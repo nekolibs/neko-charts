@@ -1,0 +1,32 @@
+{
+  "name": "@neko-os/neko-charts",
+  "version": "0.0.2",
+  "author": "Christian Storch <ccstorch@gmail.com>",
+  "main": "dist/index.js",
+  "react-native": "src/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "yarn babel src --out-dir dist --extensions \".js,.jsx\" --copy-files",
+    "prepublishOnly": "yarn build",
+    "publish": "npm publish --access public"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-svg": "*"
+  },
+  "dependencies": {
+    "react-native-svg-web": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "metro-react-native-babel-preset": "^0.73.0"
+  }
+}
