@@ -5,15 +5,17 @@ Universal React Native charts library (works on react-native, react-native-web a
 ## Install
 
 ```
-yarn add @nekolibs/neko-charts
+yarn add @neko-os/charts
 ```
 
 ### Mobile
+
 ```
 yarn add react-native-svg
 ```
 
 ### Web or native-web
+
 ```
 yarn add react-native-web react-native-svg-web
 ```
@@ -42,7 +44,7 @@ export default defineConfig({
 ## Usage
 
 ```js
-import { SimpleLinesChart } from '@nekolibs/neko-charts
+import { SimpleLinesChart } from '@neko-os/charts
 
 const DATA = [
   {

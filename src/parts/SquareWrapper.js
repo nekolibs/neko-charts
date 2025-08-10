@@ -1,7 +1,6 @@
+import { View } from 'react-native'
 import React from 'react'
 import Svg from 'react-native-svg'
-
-import { View } from 'react-native'
 
 export function SquareWrapper({ width, height, children, ...props }) {
   const size = Math.min(height, width)
