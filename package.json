@@ -4,10 +4,7 @@
   "author": "Christian Storch <ccstorch@gmail.com>",
   "main": "dist/index.js",
   "react-native": "src/index.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "scripts": {
     "build": "yarn babel src --out-dir dist --extensions \".js,.jsx\" --copy-files",
     "prepublishOnly": "yarn build",
@@ -17,11 +14,15 @@
     "access": "public"
   },
   "peerDependencies": {
+    "ramda": "^0.31.3",
+    "dayjs": "^1.11.13",
     "react": "*",
     "react-native": "*",
     "react-native-svg": "*"
   },
   "dependencies": {
+    "dayjs": "^1.11.13",
+    "ramda": "^0.31.3",
     "react-native-svg-web": "^1.0.0"
   },
   "devDependencies": {

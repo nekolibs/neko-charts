@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import Svg, { Circle } from 'react-native-svg-web'
+import Svg, { Circle } from 'react-native-svg'
 
 export function SvgTest({ size = 100 }) {
   return (
