@@ -1,6 +1,6 @@
 {
   "name": "@neko-os/charts",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "author": "Christian Storch <ccstorch@gmail.com>",
   "main": "dist/index.js",
   "module": "dist/index.js",
