@@ -21,7 +21,7 @@ export function useColorsScale(customColors) {
 }
 
 export function useTheme(customTheme) {
-  const { theme, datk } = useChartTheme()
+  const { theme, dark } = useChartTheme()
 
   const defaultTheme = {
     gridColor: dark ? '#FFFFFF40' : '#1B1C1D40',
