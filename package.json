@@ -1,13 +1,10 @@
 {
-  "name": "@neko-os/neko-charts",
+  "name": "@neko-os/charts",
   "version": "0.0.2",
   "author": "Christian Storch <ccstorch@gmail.com>",
   "main": "dist/index.js",
   "react-native": "src/index.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "scripts": {
     "build": "yarn babel src --out-dir dist --extensions \".js,.jsx\" --copy-files",
     "prepublishOnly": "yarn build",
