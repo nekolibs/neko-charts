@@ -1,5 +1,6 @@
 import { Text as SvgText } from 'react-native-svg'
 
+import { formatLargeNumber } from '../_helpers/numbers'
 import { useTheme } from '../NekoChartTheme'
 
 export function StackedTotalLabelsChart({
@@ -61,7 +62,7 @@ export function StackedTotalLabelsChart({
             alignmentBaseline="baseline"
             textAnchor="middle"
           >
-            {total}
+            {formatLargeNumber(total)}
           </SvgText>
         )
       })}

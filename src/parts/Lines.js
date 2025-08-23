@@ -55,7 +55,10 @@ export function Lines({
           const x = spaceAround
             ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
             : xSpace + paddingLeft + i * stepX // End-to-end
-          const y = ySpace + paddingTop + (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+          const y =
+            ySpace +
+            paddingTop +
+            (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
           if (isFirstPoint) {
             linePath += `M${x},${y}`
@@ -66,7 +69,7 @@ export function Lines({
         })
 
         return (
-          <React.Fragment key={serie.serie}>
+          <React.Fragment key={serie.name}>
             <Path d={linePath} fill="none" stroke={serieColor} strokeWidth={2} />
           </React.Fragment>
         )

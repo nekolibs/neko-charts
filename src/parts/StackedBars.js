@@ -62,7 +62,7 @@ export function StackedBars({
           const borderRadius = 4
 
           return (
-            <React.Fragment key={`${serie.serie}-bar-${i}`}>
+            <React.Fragment key={`${serie.name}-bar-${i}`}>
               {isFirstSegment && isLastSegment ? (
                 // Single segment - round all corners
                 <Rect x={x} y={y} width={barWidth} height={barHeight} fill={serieColor} rx={borderRadius} />

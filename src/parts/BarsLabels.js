@@ -1,6 +1,7 @@
 import { Text as SvgText } from 'react-native-svg'
 
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
+import { formatLargeNumber } from '../_helpers/numbers'
 import { useTheme } from '../NekoChartTheme'
 
 const VALUE_LABEL_OFFSET = 5
@@ -48,7 +49,7 @@ export function BarsLabels({
 
           return (
             <SvgText
-              key={`${serie.serie}-bar-label-${i}`}
+              key={`${serie.name}-bar-label-${i}`}
               x={x + barWidth / 2}
               y={y - VALUE_LABEL_OFFSET}
               fontSize={theme?.valueSize}

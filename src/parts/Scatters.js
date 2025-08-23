@@ -39,6 +39,7 @@ export function Scatters({
     // End-to-end distribution (like line charts)
     stepX = xPoints > 1 ? chartWidth / (xPoints - 1) : chartWidth
   }
+  console.log(series)
 
   return (
     <>
@@ -46,7 +47,7 @@ export function Scatters({
         const serieColor = serie.color || getColorFromScale(colors, serieIndex) || '#818DF9'
 
         return (
-          <React.Fragment key={`${serie.serie}-points`}>
+          <React.Fragment key={`${serie.name}-points`}>
             {serie.data.map((point, i) => {
               if (point.y === null || point.y === undefined) {
                 return null // Skip null points
@@ -56,9 +57,11 @@ export function Scatters({
                 ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
                 : xSpace + paddingLeft + i * stepX // End-to-end
               const y =
-                ySpace + paddingTop + (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+                ySpace +
+                paddingTop +
+                (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
-              return <Circle key={`${serie.serie}-point-${i}`} cx={x} cy={y} r={theme.pointSize} fill={serieColor} />
+              return <Circle key={`${serie.name}-point-${i}`} cx={x} cy={y} r={theme.pointSize} fill={serieColor} />
             })}
           </React.Fragment>
         )

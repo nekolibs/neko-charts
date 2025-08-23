@@ -2,6 +2,7 @@ import { Text as SvgText } from 'react-native-svg'
 import React from 'react'
 
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
+import { formatLargeNumber } from '../_helpers/numbers'
 import { useTheme } from '../NekoChartTheme'
 
 const VALUE_LABEL_OFFSET = 8
@@ -42,25 +43,36 @@ export function LabelsChart({
     stepX = xPoints > 1 ? chartWidth / (xPoints - 1) : chartWidth
   }
 
+  // Calculate which labels to show based on available width
+  const minLabelWidth = 40 // Minimum pixels needed per label
+  const labelsToShow = Math.max(1, Math.floor(chartWidth / minLabelWidth))
+  const interval = Math.ceil(xPoints / labelsToShow)
+
   return (
     <>
       {series.map((serie, serieIndex) => {
         return (
-          <React.Fragment key={`${serie.serie}-values`}>
+          <React.Fragment key={`${serie.name}-values`}>
             {serie.data.map((point, i) => {
               if (point.y === null || point.y === undefined) {
                 return null // Skip null points
               }
 
+              // Only show labels at calculated interval
+              const shouldShowLabel = i % interval === 0
+              if (!shouldShowLabel) return null
+
               const x = spaceAround
                 ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
                 : xSpace + paddingLeft + i * stepX // End-to-end
               const y =
-                ySpace + paddingTop + (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+                ySpace +
+                paddingTop +
+                (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
               return (
                 <SvgText
-                  key={`${serie.serie}-value-${i}`}
+                  key={`${serie.name}-value-${i}`}
                   x={x}
                   y={y - VALUE_LABEL_OFFSET}
                   fontSize={theme.valueSize}
@@ -68,7 +80,7 @@ export function LabelsChart({
                   alignmentBaseline="baseline"
                   textAnchor="middle"
                 >
-                  {point.y}
+                  {formatLargeNumber(point.y)}
                 </SvgText>
               )
             })}

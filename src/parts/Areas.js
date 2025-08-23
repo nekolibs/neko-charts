@@ -59,7 +59,10 @@ export function Areas({
           const x = spaceAround
             ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
             : xSpace + paddingLeft + i * stepX // End-to-end
-          const y = ySpace + paddingTop + (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+          const y =
+            ySpace +
+            paddingTop +
+            (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
           if (isFirstPoint) {
             firstX = x
@@ -77,7 +80,7 @@ export function Areas({
         }
 
         return (
-          <React.Fragment key={serie.serie}>
+          <React.Fragment key={serie.name}>
             <Path d={areaPath} fill={serieColor + '30'} stroke="none" />
           </React.Fragment>
         )

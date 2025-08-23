@@ -2,13 +2,14 @@ import React from 'react'
 import Svg, { Line, Text as SvgText } from 'react-native-svg'
 
 import { useTheme } from '../NekoChartTheme'
+import { createXLabelFormatter, createYLabelFormatter } from '../_helpers/axis'
 
 export function Axis({
   // Data and dimensions
   data = [],
   series = [],
-  width = 200,
-  height = 200,
+  width,
+  height,
   xSpace = 0,
   ySpace = 0,
 
@@ -29,8 +30,8 @@ export function Axis({
   spaceAround = false, // If true, distributes with equal space between items
 
   // Custom formatters
-  formatXLabel = (value) => value,
-  formatYLabel = (value) => value,
+  formatXLabel,
+  formatYLabel,
   children,
   ...props
 }) {
@@ -51,6 +52,10 @@ export function Axis({
   // Calculate maxValue from series if not provided
   const maxValue = series.length > 0 ? Math.max(...series.flatMap((s) => s.data.map((d) => d.y))) : 0
 
+  // Create smart formatters if not provided
+  const smartXFormatter = formatXLabel || createXLabelFormatter(firstData)
+  const smartYFormatter = formatYLabel || createYLabelFormatter()
+
   // Calculate stepX based on spaceAround setting
   let stepX
   if (spaceAround) {
@@ -61,9 +66,11 @@ export function Axis({
     stepX = firstData.length > 1 ? chartWidth / (firstData.length - 1) : chartWidth
   }
 
-  // Generate Y axis values if showing Y axis or Y labels
+  // Generate Y axis values based on stepY
   const yAxisValues =
-    (showYAxis || showYLabels || showYGrid) && maxValue ? Array.from({ length: Math.floor(maxValue / stepY) + 1 }, (_, i) => i * stepY) : []
+    (showYAxis || showYLabels || showYGrid) && maxValue
+      ? Array.from({ length: Math.floor(maxValue / stepY) + 1 }, (_, i) => i * stepY)
+      : []
 
   return (
     <Svg height={height} width={width}>
@@ -132,6 +139,21 @@ export function Axis({
       {/* X Labels */}
       {showXLabels &&
         firstData.map((point, i) => {
+          // Calculate minimum space needed per label (approximate)
+          const minLabelWidth = 60 // Minimum pixels needed per label
+          const totalLabels = firstData.length
+          const availableWidth = chartWidth
+          const labelsToShow = Math.max(2, Math.floor(availableWidth / minLabelWidth))
+
+          // Calculate interval to skip labels
+          const interval = Math.ceil(totalLabels / labelsToShow)
+
+          // Only show labels at the calculated interval, skip first and last
+          const shouldShowLabel =
+            (!!spaceAround || i !== 0) && (!!spaceAround || i !== totalLabels - 1) && i % interval === 0
+
+          if (!shouldShowLabel) return null
+
           // Position based on spaceAround setting
           const x = spaceAround
             ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
@@ -147,7 +169,7 @@ export function Axis({
               alignmentBaseline="middle"
               textAnchor="middle"
             >
-              {point.x}
+              {smartXFormatter(point.x)}
             </SvgText>
           )
         })}
@@ -155,7 +177,22 @@ export function Axis({
       {/* Y Labels */}
       {showYLabels &&
         yAxisValues.map((value, i) => {
+          // Calculate minimum space needed per label
+          const minLabelHeight = 40 // Minimum pixels needed per label
+          const totalLabels = yAxisValues.length
+          const availableHeight = chartHeight
+          const labelsToShow = Math.max(2, Math.floor(availableHeight / minLabelHeight))
+
+          // Calculate interval to skip labels
+          const interval = Math.ceil(totalLabels / labelsToShow)
+
+          // Skip first (0) and show labels at interval
+          const shouldShowLabel = i !== 0 && (i === totalLabels - 1 || i % interval === 0)
+
+          if (!shouldShowLabel) return null
+
           const y = ySpace + paddingTop + (chartHeight - (value / maxValue) * chartHeight)
+
           return (
             <SvgText
               key={`y-label-${i}`}
@@ -166,7 +203,7 @@ export function Axis({
               alignmentBaseline="middle"
               textAnchor="end"
             >
-              {formatYLabel(value)}
+              {smartYFormatter(value)}
             </SvgText>
           )
         })}
@@ -186,7 +223,7 @@ export function Axis({
           spaceAround,
           theme,
           ...props,
-        }),
+        })
       )}
     </Svg>
   )

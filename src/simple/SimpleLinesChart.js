@@ -6,8 +6,9 @@ import { LegendWrapper } from '../parts/LegendWrapper'
 import { Lines } from '../parts/Lines'
 import { NekoChart } from '../NekoChart'
 import { Scatters } from '../parts/Scatters'
+import { XAxisTooltip } from '../parts/XAxisTooltip'
 
-export function SimpleLinesChart({ area = false, showValues = true, xSpace = 15, ...props }) {
+export function SimpleLinesChart({ area = false, showValues = true, showTooltip = true, xSpace = 15, ...props }) {
   return (
     <LegendWrapper {...props}>
       <NekoChart xSpace={15} {...props}>
@@ -16,7 +17,7 @@ export function SimpleLinesChart({ area = false, showValues = true, xSpace = 15,
           <Scatters {...props} />
           <Areas hide={!area} {...props} />
           <LabelsChart hide={!showValues} {...props} />
-          <AxisInteractive {...props} />
+          <XAxisTooltip hide={!showTooltip} {...props} />
         </Axis>
       </NekoChart>
     </LegendWrapper>

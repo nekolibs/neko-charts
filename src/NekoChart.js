@@ -6,7 +6,7 @@ import ResponsiveChartWrapper from './ResponsiveChartWrapper'
 export const CHART_PADDING_TOP = 40
 export const CHART_PADDING_BOTTOM = 10
 
-function Content({ height = 200, width, children, data, ...props }) {
+function Content({ height, width, children, data, ...props }) {
   const series = formatChartSeries(data)
   props = { width, height, data, series, ...props }
 

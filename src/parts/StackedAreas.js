@@ -54,14 +54,18 @@ export function StackedAreas({
           // Calculate cumulative value up to this series (top line)
           const cumulativeValue = series.slice(0, serieIndex + 1).reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)
           const topY =
-            ySpace + paddingTop + (chartHeight - (cumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+            ySpace +
+            paddingTop +
+            (chartHeight - (cumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
           // Calculate cumulative value up to previous series (bottom line)
           const previousCumulativeValue = series.slice(0, serieIndex).reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)
           const bottomY =
             ySpace +
             paddingTop +
-            (chartHeight - (previousCumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+            (chartHeight -
+              (previousCumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) -
+              CHART_PADDING_BOTTOM)
 
           if (i === 0) {
             return `M${x},${bottomY} L${x},${topY}`
@@ -77,14 +81,16 @@ export function StackedAreas({
           const bottomY =
             ySpace +
             paddingTop +
-            (chartHeight - (previousCumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+            (chartHeight -
+              (previousCumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) -
+              CHART_PADDING_BOTTOM)
 
           areaPath += ` L${x},${bottomY}`
         }
         areaPath += ' Z'
 
         return (
-          <React.Fragment key={serie.serie}>
+          <React.Fragment key={serie.name}>
             <Path d={areaPath} fill={serieColor + '30'} stroke="none" />
           </React.Fragment>
         )

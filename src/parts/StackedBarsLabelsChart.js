@@ -1,5 +1,6 @@
 import { Text as SvgText } from 'react-native-svg'
 
+import { formatLargeNumber } from '../_helpers/numbers'
 import { useTheme } from '../NekoChartTheme'
 
 export function StackedBarsLabelsChart({
@@ -53,7 +54,7 @@ export function StackedBarsLabelsChart({
 
           return (
             <SvgText
-              key={`${serie.serie}-label-${i}`}
+              key={`${serie.name}-label-${i}`}
               x={x + barWidth / 2}
               y={y + barHeight / 2}
               fontSize={theme.valueSize}
@@ -61,7 +62,7 @@ export function StackedBarsLabelsChart({
               alignmentBaseline="middle"
               textAnchor="middle"
             >
-              {point.y}
+              {formatLargeNumber(point.y)}
             </SvgText>
           )
         })

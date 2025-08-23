@@ -5,12 +5,11 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "react-native": "src/index.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "scripts": {
     "build": "rm -rf dist && babel src --out-dir dist --extensions \".js,.jsx\" --copy-files",
+    "watch": "babel src --out-dir dist --extensions \".js,.jsx\" --copy-files --watch",
+    "dev": "yarn build && yarn watch",
     "prepublishOnly": "yarn build",
     "publish": "npm publish --access public"
   },
@@ -25,11 +24,9 @@
     "react-native-svg": "*"
   },
   "dependencies": {
-    "dayjs": "^1.11.13",
     "prop-types": "^15.8.1",
-    "ramda": "^0.31.3",
     "react-native-svg-web": "^1.0.0",
-    "react-native-web": "^0.19.0"
+    "react-native-web": "^0.21.0"
   },
   "devDependencies": {
     "@babel/cli": "^7",

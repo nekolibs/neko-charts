@@ -5,7 +5,7 @@ export function SvgTest({ size = 100 }) {
   return (
     <View>
       <Svg height={size} width={size}>
-        <Circle cx={size / 2} cy={size / 2} r={size / 3} fill="blue" />
+        <Circle cx={size / 2} cy={size / 2} r={size / 3} fill="purple" />
       </Svg>
     </View>
   )

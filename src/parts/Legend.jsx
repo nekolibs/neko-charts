@@ -1,5 +1,6 @@
 import { View, Text } from 'react-native'
 
+import { formatChartSeries } from '../_helpers/series'
 import { getColorFromScale } from '../_helpers/colors'
 import { useColorsScale, useTheme } from '../NekoChartTheme'
 
@@ -25,17 +26,17 @@ export function Legend({
   const colors = useColorsScale(colorsScale)
   theme = useTheme(theme)
   if (!!hide) return false
-  data = data?.length ? data : series
+  series = formatChartSeries(data)
+  data = !series?.[0]?.name ? data : series
 
   // if (!data?.length || (!showLegend && !fields?.length)) return false
 
   return (
     <View
       style={{
-        flex: 1,
         flexDirection: !vertical && 'row',
         justifyContent: 'center',
-        alignItems: 'center',
+        // alignItems: 'center',
         gap: 10,
         flexWrap: 'wrap',
       }}

@@ -61,9 +61,10 @@ export function Radar({
         const dataPoints = serie.data.map((d, i) => getPointString(d.y, i)).join(' ')
 
         return (
-          <React.Fragment key={serie.serie}>
+          <React.Fragment key={serie.name}>
             {/* Data shape/area */}
-            {area && <Polygon points={dataPoints} fill={serieColor + '30'} stroke={serieColor} strokeWidth={2} opacity={0.7} />}
+            <Polygon points={dataPoints} stroke={serieColor} fill="transparent" strokeWidth={2} />
+            {area && <Polygon points={dataPoints} fill={serieColor} opacity={0.3} />}
 
             {/* Data points */}
             {showPoints &&
@@ -71,7 +72,7 @@ export function Radar({
                 const point = getPoint(d.y, i)
                 return (
                   <Circle
-                    key={`${serie.serie}-point-${i}`}
+                    key={`${serie.name}-point-${i}`}
                     cx={point.x}
                     cy={point.y}
                     r={theme.pointSize}

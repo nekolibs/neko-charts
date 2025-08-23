@@ -47,7 +47,17 @@ export function Bars({
           const x = xSpace + paddingLeft + i * groupWidth + serieIndex * (barWidth + barSpacing) + barSpacing
           const y = ySpace + paddingTop + (chartHeight - barHeight - CHART_PADDING_BOTTOM)
 
-          return <Rect key={`${serie.serie}-bar-${i}`} x={x} y={y} width={barWidth} height={barHeight} fill={serieColor} rx={4} />
+          return (
+            <Rect
+              key={`${serie.name}-bar-${i}`}
+              x={x}
+              y={y}
+              width={barWidth}
+              height={barHeight}
+              fill={serieColor}
+              rx={4}
+            />
+          )
         })
       })}
     </>

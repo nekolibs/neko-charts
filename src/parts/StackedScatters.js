@@ -48,7 +48,7 @@ export function StackedScatters({
         const serieColor = serie.color || getColorFromScale(colors, serieIndex) || '#818DF9'
 
         return (
-          <React.Fragment key={`${serie.serie}-points`}>
+          <React.Fragment key={`${serie.name}-points`}>
             {serie.data.map((point, i) => {
               const x = spaceAround
                 ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
@@ -61,7 +61,7 @@ export function StackedScatters({
                 paddingTop +
                 (chartHeight - (cumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
-              return <Circle key={`${serie.serie}-point-${i}`} cx={x} cy={y} r={theme.pointSize} fill={serieColor} />
+              return <Circle key={`${serie.name}-point-${i}`} cx={x} cy={y} r={theme.pointSize} fill={serieColor} />
             })}
           </React.Fragment>
         )

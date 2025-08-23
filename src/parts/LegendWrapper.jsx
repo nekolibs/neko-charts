@@ -11,14 +11,13 @@ const POSITIONS = {
 export function LegendWrapper({ legendPosition, showLegend, legendFields, children, ...props }) {
   let before = false
   let after = false
-  let style = {}
+  let style = { height: '100%', gap: 20 }
 
   const vertical = ['left', 'right'].includes(legendPosition)
   if (['top', 'left'].includes(legendPosition)) before = <Legend vertical={vertical} {...props} />
   if (['bottom', 'right'].includes(legendPosition)) after = <Legend vertical={vertical} {...props} />
   if (['left', 'right'].includes(legendPosition)) {
     style.flexDirection = 'row'
-    style.gap = 10
     style.alignItems = 'center'
   }
 

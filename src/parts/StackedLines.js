@@ -54,13 +54,15 @@ export function StackedLines({
           // Calculate cumulative value up to this series
           const cumulativeValue = series.slice(0, serieIndex + 1).reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)
           const y =
-            ySpace + paddingTop + (chartHeight - (cumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+            ySpace +
+            paddingTop +
+            (chartHeight - (cumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
 
           return acc + (i === 0 ? `M${x},${y}` : ` L${x},${y}`)
         }, '')
 
         return (
-          <React.Fragment key={serie.serie}>
+          <React.Fragment key={serie.name}>
             <Path d={linePath} fill="none" stroke={serieColor} strokeWidth={2} />
           </React.Fragment>
         )

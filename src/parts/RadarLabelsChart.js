@@ -1,6 +1,7 @@
 import { Text as SvgText } from 'react-native-svg'
 import React from 'react'
 
+import { formatLargeNumber } from '../_helpers/numbers'
 import { useTheme } from '../NekoChartTheme'
 
 export function RadarLabelsChart({
@@ -48,12 +49,12 @@ export function RadarLabelsChart({
       {/* Value labels for each series */}
       {series.map((serie, serieIndex) => {
         return (
-          <React.Fragment key={`${serie.serie}-values`}>
+          <React.Fragment key={`${serie.name}-values`}>
             {serie.data.map((d, i) => {
               const point = getPoint(d.y, i)
               return (
                 <SvgText
-                  key={`${serie.serie}-value-${i}`}
+                  key={`${serie.name}-value-${i}`}
                   x={point.x}
                   y={point.y - 8}
                   fontSize={theme.valueSize}
@@ -61,7 +62,7 @@ export function RadarLabelsChart({
                   textAnchor="middle"
                   alignmentBaseline="baseline"
                 >
-                  {d.y}
+                  {formatLargeNumber(d.y)}
                 </SvgText>
               )
             })}
