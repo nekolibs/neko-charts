@@ -1,5 +1,6 @@
 export * from './SimpleBarsChart'
 export * from './SimpleDonutChart'
+export * from './SimpleProgressDonutChart'
 export * from './SimpleLinesChart'
 export * from './SimplePieChart'
 export * from './SimpleRadarChart'
