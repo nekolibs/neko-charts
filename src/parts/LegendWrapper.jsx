@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { View } from '@neko-os/ui'
 import React from 'react'
 
 import { Legend } from './Legend'
@@ -8,24 +8,21 @@ const POSITIONS = {
   topRight: { top: 20, right: 50 },
 }
 
-export function LegendWrapper({ legendPosition, showLegend, legendFields, children, ...props }) {
+export function LegendWrapper({ legendPosition, legendFields, width, height, children, ...props }) {
   let before = false
   let after = false
-  let style = { height: '100%', gap: 20 }
 
   const vertical = ['left', 'right'].includes(legendPosition)
   if (['top', 'left'].includes(legendPosition)) before = <Legend vertical={vertical} {...props} />
   if (['bottom', 'right'].includes(legendPosition)) after = <Legend vertical={vertical} {...props} />
-  if (['left', 'right'].includes(legendPosition)) {
-    style.flexDirection = 'row'
-    style.alignItems = 'center'
-  }
+
+  const isFixed = width > 0 && height > 0
 
   return (
-    <View style={style}>
+    <View row={vertical} fullW={!isFixed} fullH={!isFixed} gap="md" center={vertical} flex={!isFixed}>
       {before}
-      <View style={{ flex: 4 }}>
-        {React.Children.map(children, (child) => React.cloneElement(child, { showLegend, legendFields, ...props }))}
+      <View style={isFixed ? { width, height } : { flex: 4, alignSelf: 'stretch' }}>
+        {React.Children.map(children, (child) => React.cloneElement(child, { legendFields, width, height, ...props }))}
       </View>
       {after}
     </View>

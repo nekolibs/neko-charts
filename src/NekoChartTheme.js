@@ -1,47 +1,43 @@
 import { mergeDeepLeft } from 'ramda'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-import { getDefaultTheme } from './defaultTheme'
+import { useTheme as useUITheme, useColors } from '@neko-os/ui'
+
+import { buildChartThemeFromUI, buildColorsScaleFromUI, getColorsScalePreset } from './buildChartTheme'
+import { resolveColor } from './_helpers/colors'
 
 const ChartThemeContext = React.createContext()
 
-export const useChartTheme = (customTheme = {}) => {
-  return React.useContext(ChartThemeContext) || {}
+export const useChartTheme = () => React.useContext(ChartThemeContext) || {}
+
+export function useResolveColor() {
+  const themeColors = useColors()
+  return useCallback((value) => resolveColor(themeColors, value), [themeColors])
 }
 
 export function useColorsScale(customColors) {
-  const defaultColors = [
-    'rgb(60, 161, 255)', // blue
-    'rgb(41, 217, 117)', // green
-    'rgb(60, 220, 255)', // cyan
-    'rgb(255, 165, 60)', // orange
-    '#722ed1', // purple
-    '#2f54eb', // geekblue
-    '#f5222d', // red
-    '#fa8c16', // orange (again)
-  ]
   const { colorsScale } = useChartTheme()
+  const uiTheme = useUITheme()
+  const themeColors = useColors()
 
-  return customColors || colorsScale || defaultColors
+  return useMemo(() => {
+    const input = customColors || colorsScale
+    if (typeof input === 'string') return getColorsScalePreset(input, themeColors)
+    if (Array.isArray(input)) return input.map((c) => resolveColor(themeColors, c))
+    return buildColorsScaleFromUI(uiTheme)
+  }, [customColors, colorsScale, uiTheme, themeColors])
 }
 
 export function useTheme(customTheme) {
-  const { theme, dark } = useChartTheme()
-
-  const defaultTheme = getDefaultTheme(dark)
-
+  const { theme } = useChartTheme()
+  const uiTheme = useUITheme()
+  const defaultTheme = useMemo(() => buildChartThemeFromUI(uiTheme), [uiTheme])
   return mergeDeepLeft(mergeDeepLeft(customTheme, theme), defaultTheme)
 }
 
-export function NekoChartTheme({ children, colorsScale, theme, dark }) {
+export function NekoChartTheme({ children, colorsScale, theme }) {
   return (
-    <ChartThemeContext.Provider
-      value={{
-        theme,
-        colorsScale,
-        dark,
-      }}
-    >
+    <ChartThemeContext.Provider value={{ theme, colorsScale }}>
       {children}
     </ChartThemeContext.Provider>
   )

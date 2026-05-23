@@ -1,5 +1,6 @@
-import { G, Path } from 'react-native-svg'
-import { Platform } from 'react-native'
+import { AbsG } from '../abstractions/G'
+import { AbsPath } from '../abstractions/Path'
+import { Platform } from '@neko-os/ui'
 import { useState, useRef, useMemo, useCallback } from 'react'
 
 import { Tooltip } from './Tooltip'
@@ -58,7 +59,7 @@ export function PieTooltip({
   hide,
   tooltipWidth,
   tooltipPadding = 8,
-  showPercentage = true,
+  percentage = true,
   theme,
 }) {
   theme = useTheme(theme)
@@ -83,16 +84,16 @@ export function PieTooltip({
   const lineHeight = theme.tooltipSize + 4
   const tooltipHeight = useMemo(() => {
     if (!hoveredSlice) return 0
-    const items = showPercentage ? 2 : 1 // value and percentage
+    const items = percentage ? 2 : 1 // value and percentage
     return tooltipPadding * 2 + (items + 1) * lineHeight // +1 for title
-  }, [hoveredSlice, showPercentage, tooltipPadding, lineHeight])
+  }, [hoveredSlice, percentage, tooltipPadding, lineHeight])
 
   // Calculate dynamic tooltip width
   const calculatedTooltipWidth = useMemo(() => {
     if (!hoveredSlice) return tooltipWidth || 120
 
     const items = [{ label: 'Value', value: hoveredSlice.value }]
-    if (showPercentage) {
+    if (percentage) {
       items.push({ label: 'Percentage', value: `${hoveredSlice.percentage}%` })
     }
 
@@ -103,7 +104,7 @@ export function PieTooltip({
       padding: tooltipPadding,
       fixedWidth: tooltipWidth,
     })
-  }, [hoveredSlice, tooltipWidth, theme.tooltipSize, tooltipPadding, showPercentage])
+  }, [hoveredSlice, tooltipWidth, theme.tooltipSize, tooltipPadding, percentage])
 
   // Track mouse movement
   const handleMouseMove = useCallback(
@@ -151,14 +152,14 @@ export function PieTooltip({
           mouseX: mousePositionRef.current.x,
           mouseY: mousePositionRef.current.y,
           tooltipWidth: tooltipWidth || 120,
-          tooltipHeight: tooltipPadding * 2 + (showPercentage ? 3 : 2) * lineHeight,
+          tooltipHeight: tooltipPadding * 2 + (percentage ? 3 : 2) * lineHeight,
           containerWidth: width,
           containerHeight: height,
           padding: tooltipPadding,
         })
       )
     },
-    [total, width, height, tooltipWidth, tooltipPadding, lineHeight, showPercentage]
+    [total, width, height, tooltipWidth, tooltipPadding, lineHeight, percentage]
   )
 
   const handleSliceOut = useCallback(() => {
@@ -176,7 +177,7 @@ export function PieTooltip({
       },
     ]
 
-    if (showPercentage) {
+    if (percentage) {
       items.push({
         label: 'Percentage',
         value: `${hoveredSlice.percentage}%`,
@@ -184,7 +185,7 @@ export function PieTooltip({
     }
 
     return items
-  }, [hoveredSlice, showPercentage])
+  }, [hoveredSlice, percentage])
 
   // Create invisible hover areas over the pie slices
   let cumulativeAngle = 0
@@ -209,11 +210,11 @@ export function PieTooltip({
     .filter(Boolean)
 
   return (
-    <G onMouseMove={handleMouseMove}>
+    <AbsG onMouseMove={handleMouseMove}>
       {/* Invisible hover areas */}
-      <G transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
+      <AbsG transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
         {hoverAreas.map(({ path, slice, index }) => (
-          <Path
+          <AbsPath
             key={`pie-hover-area-${index}`}
             d={path}
             fill="transparent"
@@ -222,7 +223,7 @@ export function PieTooltip({
             style={{ cursor: 'pointer' }}
           />
         ))}
-      </G>
+      </AbsG>
 
       {/* Tooltip */}
       {hoveredSlice && (
@@ -236,6 +237,6 @@ export function PieTooltip({
           theme={theme}
         />
       )}
-    </G>
+    </AbsG>
   )
 }

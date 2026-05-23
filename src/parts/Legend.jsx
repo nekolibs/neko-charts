@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text } from '@neko-os/ui'
 
 import { formatChartSeries } from '../_helpers/series'
 import { getColorFromScale } from '../_helpers/colors'
@@ -13,7 +13,6 @@ export function Legend({
   data,
   series,
   legendFields,
-  showLegend,
   legendPosition,
   legendPrefix,
   legendSufix,
@@ -29,35 +28,20 @@ export function Legend({
   series = formatChartSeries(data)
   data = !series?.[0]?.name ? data : series
 
-  // if (!data?.length || (!showLegend && !fields?.length)) return false
-
   return (
-    <View
-      style={{
-        flexDirection: !vertical && 'row',
-        justifyContent: 'center',
-        // alignItems: 'center',
-        gap: 10,
-        flexWrap: 'wrap',
-      }}
-    >
+    <View wrap centerV center={!vertical} row={!vertical} gap={!vertical ? 'sm' : 'xxs'}>
       {data?.map((item, index) => {
         let label = item.name || item.label || item.x || item.serie
         // label = formatLabel(label, item.y, { prefix, sufix, fields, total })
         const color = getColorFromScale(colors, index)
 
         return (
-          <View key={index} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <View
-              style={{
-                width: theme.legendPointSize,
-                height: theme.legendPointSize,
-                borderRadius: theme.legendPointSize,
-                backgroundColor: color,
-              }}
-            />
+          <View key={index} row centerV gap="xs">
+            <View width={theme.legendPointSize} height={theme.legendPointSize} round bg={color} />
 
-            <Text style={{ fontSize: theme.legendSize, color: theme.legendColor }}>{label}</Text>
+            <Text sm color="text2">
+              {label}
+            </Text>
           </View>
         )
       })}

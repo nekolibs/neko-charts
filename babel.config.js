@@ -7,12 +7,5 @@ module.exports = {
   ],
   compact: false,
   retainLines: true,
-  plugins: [
-    ['module-resolver', {
-      alias: {
-        'react-native': 'react-native-web',
-        'react-native-svg': 'react-native-svg-web'
-      }
-    }]
-  ]
+  plugins: []
 }

@@ -1,4 +1,4 @@
-import { Path } from 'react-native-svg'
+import { AbsPath } from '../abstractions/Path'
 import React from 'react'
 
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
@@ -6,7 +6,8 @@ import { getColorFromScale } from '../_helpers/colors'
 import { useColorsScale } from '../NekoChartTheme'
 
 export function Lines({
-  series,
+  series: seriesRaw,
+  pick,
   colorsScale,
   width,
   height,
@@ -17,6 +18,10 @@ export function Lines({
   paddingTop = 0,
   paddingBottom = 0,
   spaceAround = false,
+  suggestedMax: suggestedMaxProp,
+  max: maxProp,
+  suggestedMin: suggestedMinProp,
+  min: minProp,
 }) {
   const colors = useColorsScale(colorsScale)
 
@@ -25,7 +30,12 @@ export function Lines({
   const chartHeight = height - ySpace * 2 - paddingTop - paddingBottom
 
   // Calculate max value and step
-  const maxValue = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
+  const dataMax = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
+  const rawMin = Math.min(...series.flatMap(s => s.data.map(d => d.y)))
+  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
+  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
   const xPoints = series[0]?.data?.length || 0
 
   // Calculate stepX based on spaceAround setting
@@ -41,7 +51,7 @@ export function Lines({
   return (
     <>
       {series.map((serie, serieIndex) => {
-        const serieColor = serie.color || getColorFromScale(colors, serieIndex) || '#818DF9'
+        const serieColor = serie.color || getColorFromScale(colors, seriesRaw.findIndex(s => s.name === serie.name)) || '#818DF9'
 
         // Build path string for this series, skipping null values but maintaining connection
         let linePath = ''
@@ -58,7 +68,7 @@ export function Lines({
           const y =
             ySpace +
             paddingTop +
-            (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+            (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
           if (isFirstPoint) {
             linePath += `M${x},${y}`
@@ -70,7 +80,7 @@ export function Lines({
 
         return (
           <React.Fragment key={serie.name}>
-            <Path d={linePath} fill="none" stroke={serieColor} strokeWidth={2} />
+            <AbsPath d={linePath} fill="none" stroke={serieColor} strokeWidth={2} />
           </React.Fragment>
         )
       })}

@@ -1,6 +1,7 @@
 import React from 'react'
-import { Rect } from 'react-native-svg'
-import { Platform } from 'react-native'
+import { Platform } from '@neko-os/ui'
+
+import { AbsRect } from '../abstractions/Rect'
 
 export function AxisInteractive({
   series,
@@ -56,7 +57,7 @@ export function AxisInteractive({
           index: i,
           values: series
             .map((s) => ({
-              serie: s.serie,
+              serie: s.name || s.serie,
               y: s.data[i]?.y,
               color: s.color,
             }))
@@ -64,7 +65,6 @@ export function AxisInteractive({
         }
 
         const rectProps = {
-          key: `x-interactive-${i}`,
           x: zoneX,
           y: ySpace + paddingTop,
           width: zoneWidth,
@@ -80,7 +80,7 @@ export function AxisInteractive({
           rectProps.style = { cursor: 'pointer' }
         }
 
-        return <Rect {...rectProps} />
+        return <AbsRect key={`x-interactive-${i}`} {...rectProps} />
       })}
     </>
   )

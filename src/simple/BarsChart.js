@@ -6,15 +6,15 @@ import { LegendWrapper } from '../parts/LegendWrapper'
 import { NekoChart } from '../NekoChart'
 import { XAxisTooltip } from '../parts/XAxisTooltip'
 
-export function SimpleBarsChart({ showTooltip = true, ...props }) {
+export function BarsChart({ legend = false, legendPosition = 'bottom', tooltip = false, values = false, xLabels = false, xGrid = false, yLabels = false, yGrid = false, ...props }) {
   return (
-    <LegendWrapper {...props}>
+    <LegendWrapper legendPosition={legend ? legendPosition : undefined} {...props}>
       <NekoChart {...props}>
-        <Axis spaceAround howXGrid={false} {...props}>
+        <Axis spaceAround xLabels={xLabels} xGrid={xGrid} yLabels={yLabels} yGrid={yGrid} {...props}>
           <Bars {...props} />
-          <BarsLabels {...props} />
+          <BarsLabels hide={!values} {...props} />
           <AxisInteractive {...props} />
-          <XAxisTooltip hide={!showTooltip} {...props} />
+          <XAxisTooltip hide={!tooltip} {...props} />
         </Axis>
       </NekoChart>
     </LegendWrapper>

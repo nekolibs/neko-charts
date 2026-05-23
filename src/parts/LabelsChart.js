@@ -1,4 +1,4 @@
-import { Text as SvgText } from 'react-native-svg'
+import { AbsSvgText } from '../abstractions/SvgText'
 import React from 'react'
 
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
@@ -8,7 +8,8 @@ import { useTheme } from '../NekoChartTheme'
 const VALUE_LABEL_OFFSET = 8
 
 export function LabelsChart({
-  series,
+  series: seriesRaw,
+  pick,
   width,
   height,
   xSpace = 15,
@@ -19,6 +20,10 @@ export function LabelsChart({
   paddingBottom = 0,
   spaceAround = false,
   hide,
+  suggestedMax: suggestedMaxProp,
+  max: maxProp,
+  suggestedMin: suggestedMinProp,
+  min: minProp,
 
   theme,
 }) {
@@ -30,7 +35,12 @@ export function LabelsChart({
   const chartHeight = height - ySpace * 2 - paddingTop - paddingBottom
 
   // Calculate max value and step
-  const maxValue = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
+  const dataMax = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
+  const rawMin = Math.min(...series.flatMap(s => s.data.map(d => d.y)))
+  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
+  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
   const xPoints = series[0]?.data?.length || 0
 
   // Calculate stepX based on spaceAround setting
@@ -68,10 +78,10 @@ export function LabelsChart({
               const y =
                 ySpace +
                 paddingTop +
-                (chartHeight - (point.y / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+                (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
               return (
-                <SvgText
+                <AbsSvgText
                   key={`${serie.name}-value-${i}`}
                   x={x}
                   y={y - VALUE_LABEL_OFFSET}
@@ -81,7 +91,7 @@ export function LabelsChart({
                   textAnchor="middle"
                 >
                   {formatLargeNumber(point.y)}
-                </SvgText>
+                </AbsSvgText>
               )
             })}
           </React.Fragment>

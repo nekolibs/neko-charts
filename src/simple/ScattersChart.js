@@ -6,14 +6,14 @@ import { LegendWrapper } from '../parts/LegendWrapper'
 import { NekoChart } from '../NekoChart'
 import { Scatters } from '../parts/Scatters'
 
-export function SimpleScattersChart({ area = false, showValues = true, xSpace = 15, ...props }) {
+export function ScattersChart({ legend = false, legendPosition = 'bottom', area = false, values = false, xSpace = 15, ...props }) {
   return (
-    <LegendWrapper {...props}>
+    <LegendWrapper legendPosition={legend ? legendPosition : undefined} {...props}>
       <NekoChart xSpace={15} {...props}>
         <Axis {...props}>
           <Scatters {...props} />
           <Areas hide={!area} {...props} />
-          <LabelsChart hide={!showValues} {...props} />
+          <LabelsChart hide={!values} {...props} />
           <AxisInteractive {...props} />
         </Axis>
       </NekoChart>

@@ -24,13 +24,10 @@
     "dayjs": "^1.11.13",
     "ramda": "^0.31.3",
     "react": "*",
-    "react-native": "*",
-    "react-native-svg": "*",
-    "react-native-web": "*"
+    "react-native": "*"
   },
   "dependencies": {
-    "prop-types": "^15.8.1",
-    "react-native-svg-web": "^1.0.0"
+    "prop-types": "^15.8.1"
   },
   "devDependencies": {
     "@babel/cli": "^7",

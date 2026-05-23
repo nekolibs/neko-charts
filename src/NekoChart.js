@@ -1,21 +1,31 @@
 import React from 'react'
 
 import { formatChartSeries } from './_helpers/series'
+import { useResolveColor } from './NekoChartTheme'
 import ResponsiveChartWrapper from './ResponsiveChartWrapper'
 
 export const CHART_PADDING_TOP = 40
 export const CHART_PADDING_BOTTOM = 10
 
+function resolveSeriesColors(series, resolve) {
+  return series.map((s) => ({
+    ...s,
+    color: resolve(s.color),
+    data: s.data?.map((d) => (d.color ? { ...d, color: resolve(d.color) } : d)),
+  }))
+}
+
 function Content({ height, width, children, data, ...props }) {
-  const series = formatChartSeries(data)
+  const resolve = useResolveColor()
+  const series = resolveSeriesColors(formatChartSeries(data), resolve)
   props = { width, height, data, series, ...props }
 
   return React.Children.map(children, (child) => React.cloneElement(child, props))
 }
 
-export function NekoChart({ ...props }) {
+export function NekoChart({ width, height, ...props }) {
   return (
-    <ResponsiveChartWrapper>
+    <ResponsiveChartWrapper width={width} height={height}>
       <Content {...props} />
     </ResponsiveChartWrapper>
   )

@@ -6,14 +6,14 @@ import { StackedBars } from '../parts/StackedBars'
 import { StackedBarsLabelsChart } from '../parts/StackedBarsLabelsChart'
 import { StackedTotalLabelsChart } from '../parts/StackedTotalLabelsChart'
 
-export function SimpleStackedBarsChart({ showTotals = false, showValues = true, ...props }) {
+export function StackedBarsChart({ legend = false, legendPosition = 'bottom', totals = false, values = false, ...props }) {
   return (
-    <LegendWrapper {...props}>
+    <LegendWrapper legendPosition={legend ? legendPosition : undefined} {...props}>
       <NekoChart {...props}>
-        <Axis spaceAround showXGrid={false} {...props}>
+        <Axis spaceAround stacked xGrid={false} {...props}>
           <StackedBars {...props} />
-          <StackedBarsLabelsChart hide={!showValues} {...props} />
-          <StackedTotalLabelsChart hide={!showTotals} {...props} />
+          <StackedBarsLabelsChart hide={!values} {...props} />
+          <StackedTotalLabelsChart hide={!totals} {...props} />
           <AxisInteractive {...props} />
         </Axis>
       </NekoChart>

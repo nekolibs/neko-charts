@@ -1,10 +1,12 @@
-import { Text as SvgText } from 'react-native-svg'
+import { AbsSvgText } from '../abstractions/SvgText'
 
+import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { formatLargeNumber } from '../_helpers/numbers'
 import { useTheme } from '../NekoChartTheme'
 
 export function StackedBarsLabelsChart({
-  series,
+  series: seriesRaw,
+  pick,
   width,
   height,
   xSpace = 15,
@@ -15,6 +17,10 @@ export function StackedBarsLabelsChart({
   paddingBottom = 0,
   spaceAround = true, // Always true for stacked bars like regular bars
   hide,
+  suggestedMax: suggestedMaxProp,
+  max: maxProp,
+  suggestedMin: suggestedMinProp,
+  min: minProp,
   theme,
 }) {
   theme = useTheme(theme)
@@ -25,7 +31,12 @@ export function StackedBarsLabelsChart({
   const chartHeight = height - ySpace * 2 - paddingTop - paddingBottom
 
   // Find max value (sum of all series at each point)
-  const maxValue = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
+  const dataMax = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
+  const rawMin = Math.min(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
+  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
 
   // Get x points length
   const xPoints = series[0]?.data?.length || 0
@@ -39,21 +50,22 @@ export function StackedBarsLabelsChart({
     <>
       {series.map((serie, serieIndex) => {
         return serie.data.map((point, i) => {
-          const barHeight = (point.y / maxValue) * (chartHeight - 40)
+          const barHeight = (point.y / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
 
           // Calculate stacked position - sum of all previous series at this point
           const previousHeight = series
             .slice(0, serieIndex)
-            .reduce((sum, s) => sum + ((s.data[i]?.y || 0) / maxValue) * (chartHeight - 40), 0)
+            .reduce((sum, s) => sum + ((s.data[i]?.y || 0) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM), 0)
 
+          const minOffset = (-minValue / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
           const x = xSpace + paddingLeft + i * groupWidth + barSpacing
-          const y = ySpace + paddingTop + (chartHeight - barHeight - previousHeight - 20)
+          const y = ySpace + paddingTop + (chartHeight - barHeight - previousHeight - minOffset - CHART_PADDING_BOTTOM)
 
           // Only show label if bar height is large enough (same as original)
           if (barHeight <= 15) return null
 
           return (
-            <SvgText
+            <AbsSvgText
               key={`${serie.name}-label-${i}`}
               x={x + barWidth / 2}
               y={y + barHeight / 2}
@@ -63,7 +75,7 @@ export function StackedBarsLabelsChart({
               textAnchor="middle"
             >
               {formatLargeNumber(point.y)}
-            </SvgText>
+            </AbsSvgText>
           )
         })
       })}

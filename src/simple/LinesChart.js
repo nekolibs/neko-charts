@@ -8,20 +8,20 @@ import { NekoChart } from '../NekoChart'
 import { Scatters } from '../parts/Scatters'
 import { XAxisTooltip } from '../parts/XAxisTooltip'
 
-export function SimpleLinesChart({ area = false, showValues = true, showTooltip = true, xSpace = 15, ...props }) {
+export function LinesChart({ legend = false, legendPosition = 'bottom', area = false, dots = false, dotSize, values = false, tooltip = false, xSpace = 15, ...props }) {
   return (
-    <LegendWrapper {...props}>
+    <LegendWrapper legendPosition={legend ? legendPosition : undefined} {...props}>
       <NekoChart xSpace={15} {...props}>
         <Axis {...props}>
           <Lines {...props} />
-          <Scatters {...props} />
+          <Scatters hide={!dots} dotSize={dotSize} {...props} />
           <Areas hide={!area} {...props} />
-          <LabelsChart hide={!showValues} {...props} />
-          <XAxisTooltip hide={!showTooltip} {...props} />
+          <LabelsChart hide={!values} {...props} />
+          <XAxisTooltip hide={!tooltip} {...props} />
         </Axis>
       </NekoChart>
     </LegendWrapper>
   )
 }
 
-export const SimpleAreasChart = (props) => <SimpleLinesChart {...props} area />
+export const AreasChart = (props) => <LinesChart {...props} area />

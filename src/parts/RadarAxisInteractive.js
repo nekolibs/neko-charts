@@ -1,5 +1,5 @@
-import { Path } from 'react-native-svg'
-import { Platform } from 'react-native'
+import { AbsPath } from '../abstractions/Path'
+import { Platform } from '@neko-os/ui'
 
 export function RadarAxisInteractive({
   series,
@@ -11,7 +11,8 @@ export function RadarAxisInteractive({
   paddingRight = 0,
   paddingTop = 0,
   paddingBottom = 0,
-  showLabels = true,
+  labels = true,
+  suggestedMax: suggestedMaxProp,
   onAxisPress = console.log,
   onAxisHover,
   onAxisHoverOut,
@@ -26,13 +27,14 @@ export function RadarAxisInteractive({
   const centerX = xSpace + paddingLeft + availableWidth / 2
   const centerY = ySpace + paddingTop + availableHeight / 2
 
-  // Find max value across all series
-  const maxValue = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  // Find max value across all series (soft max — expands if data exceeds)
+  const dataMax = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  const maxValue = suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax
 
   // Use first series for axis labels (assuming all series have same structure)
   const axisLabels = series[0]?.data || []
   const angleSlice = (Math.PI * 2) / axisLabels.length
-  const radius = size / 2 - (showLabels ? 30 : 10)
+  const radius = size / 2 - (labels ? 30 : 10)
 
   return (
     <>
@@ -60,7 +62,7 @@ export function RadarAxisInteractive({
           index: i,
           values: series
             .map((s) => ({
-              serie: s.serie,
+              serie: s.name || s.serie,
               y: s.data[i]?.y,
               color: s.color,
             }))
@@ -68,7 +70,6 @@ export function RadarAxisInteractive({
         }
 
         const pathProps = {
-          key: `radar-interactive-${i}`,
           d: slicePath,
           fill: 'transparent',
           onPress: onAxisPress ? () => onAxisPress(axisInfo) : undefined,
@@ -81,7 +82,7 @@ export function RadarAxisInteractive({
           pathProps.style = { cursor: 'pointer' }
         }
 
-        return <Path {...pathProps} />
+        return <AbsPath key={`radar-interactive-${i}`} {...pathProps} />
       })}
     </>
   )

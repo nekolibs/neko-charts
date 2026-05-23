@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react'
-import { G, Rect, Text } from 'react-native-svg'
+import { AbsG } from '../abstractions/G'
+import { AbsRect } from '../abstractions/Rect'
+import { AbsSvgText } from '../abstractions/SvgText'
 import { calculateTooltipWidth } from '../_helpers/tooltip'
 
 /**
@@ -38,13 +40,13 @@ export function Tooltip({
   )
 
   return (
-    <G transform={`translate(${x}, ${y})`} style={{ pointerEvents: 'none' }}>
+    <AbsG transform={`translate(${x}, ${y})`} style={{ pointerEvents: 'none' }}>
       {/* Background */}
-      <Rect x={0} y={0} width={calculatedWidth} height={tooltipHeight} fill={theme.tooltipBGColor} rx={4} opacity={opacity} />
+      <AbsRect x={0} y={0} width={calculatedWidth} height={tooltipHeight} fill={theme.tooltipBGColor} rx={4} opacity={opacity} />
 
       {/* Title */}
       {title && (
-        <Text
+        <AbsSvgText
           x={padding}
           y={padding + theme.tooltipSize}
           fill={theme.tooltipColor}
@@ -52,7 +54,7 @@ export function Tooltip({
           fontWeight="bold"
         >
           {title}
-        </Text>
+        </AbsSvgText>
       )}
 
       {/* Items */}
@@ -60,22 +62,22 @@ export function Tooltip({
         const yOffset = (title ? index + 1 : index) * lineHeight
 
         return (
-          <G key={`${item.label}-${index}`} transform={`translate(0, ${yOffset})`}>
+          <AbsG key={`${item.label}-${index}`} transform={`translate(0, ${yOffset})`}>
             {/* Color indicator */}
-            {item.color && <Rect x={padding} y={padding + 3} width={8} height={8} fill={item.color} rx={1} />}
+            {item.color && <AbsRect x={padding} y={padding + 3} width={8} height={8} fill={item.color} rx={1} />}
 
             {/* Label */}
-            <Text
+            <AbsSvgText
               x={item.color ? padding + 12 : padding}
               y={padding + theme.tooltipSize}
               fill={theme.tooltipColor}
               fontSize={theme.tooltipSize - 1}
             >
               {item.label}
-            </Text>
+            </AbsSvgText>
 
             {/* Value */}
-            <Text
+            <AbsSvgText
               x={calculatedWidth - padding}
               y={padding + theme.tooltipSize}
               fill={theme.tooltipColor}
@@ -84,10 +86,10 @@ export function Tooltip({
               fontWeight="bold"
             >
               {item.value}
-            </Text>
-          </G>
+            </AbsSvgText>
+          </AbsG>
         )
       })}
-    </G>
+    </AbsG>
   )
 }

@@ -1,11 +1,14 @@
-import { Rect, Path } from 'react-native-svg'
+import { AbsPath } from '../abstractions/Path'
+import { AbsRect } from '../abstractions/Rect'
 import React from 'react'
 
+import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { getColorFromScale } from '../_helpers/colors'
 import { useColorsScale, useTheme } from '../NekoChartTheme'
 
 export function StackedBars({
-  series,
+  series: seriesRaw,
+  pick,
   colorsScale,
   width,
   height,
@@ -17,6 +20,11 @@ export function StackedBars({
   paddingBottom = 0,
   spaceAround = true, // Always true for stacked bars like regular bars
   hide,
+  suggestedMax: suggestedMaxProp,
+  max: maxProp,
+  suggestedMin: suggestedMinProp,
+  min: minProp,
+  cornerRadius = 10,
   theme,
 }) {
   const colors = useColorsScale(colorsScale)
@@ -28,7 +36,12 @@ export function StackedBars({
   const chartHeight = height - ySpace * 2 - paddingTop - paddingBottom
 
   // Find max value (sum of all series at each point)
-  const maxValue = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
+  const dataMax = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
+  const rawMin = Math.min(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
+  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
 
   // Get x points length
   const xPoints = series[0]?.data?.length || 0
@@ -41,34 +54,35 @@ export function StackedBars({
   return (
     <>
       {series.map((serie, serieIndex) => {
-        const serieColor = serie.color || getColorFromScale(colors, serieIndex) || '#818DF9'
+        const serieColor = serie.color || getColorFromScale(colors, seriesRaw.findIndex(s => s.name === serie.name)) || '#818DF9'
 
         return serie.data.map((point, i) => {
-          const barHeight = (point.y / maxValue) * (chartHeight - 40)
+          const barHeight = (point.y / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
 
           // Calculate stacked position - sum of all previous series at this point
           const previousHeight = series
             .slice(0, serieIndex)
-            .reduce((sum, s) => sum + ((s.data[i]?.y || 0) / maxValue) * (chartHeight - 40), 0)
+            .reduce((sum, s) => sum + ((s.data[i]?.y || 0) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM), 0)
 
+          const minOffset = (-minValue / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
           const x = xSpace + paddingLeft + i * groupWidth + barSpacing
-          const y = ySpace + paddingTop + (chartHeight - barHeight - previousHeight - 20)
+          const y = ySpace + paddingTop + (chartHeight - barHeight - previousHeight - minOffset - CHART_PADDING_BOTTOM)
 
           // Determine if this is the first or last segment
           const isFirstSegment = serieIndex === 0
           const isLastSegment = serieIndex === series.length - 1
 
           // Only round corners on edges not in contact with other segments
-          const borderRadius = 4
+          const borderRadius = cornerRadius
 
           return (
             <React.Fragment key={`${serie.name}-bar-${i}`}>
               {isFirstSegment && isLastSegment ? (
                 // Single segment - round all corners
-                <Rect x={x} y={y} width={barWidth} height={barHeight} fill={serieColor} rx={borderRadius} />
+                <AbsRect x={x} y={y} width={barWidth} height={barHeight} fill={serieColor} rx={borderRadius} />
               ) : isLastSegment ? (
                 // Top segment - round only top corners
-                <Path
+                <AbsPath
                   d={`M ${x},${y + borderRadius} 
                       Q ${x},${y} ${x + borderRadius},${y}
                       L ${x + barWidth - borderRadius},${y}
@@ -80,7 +94,7 @@ export function StackedBars({
                 />
               ) : isFirstSegment ? (
                 // Bottom segment - round only bottom corners
-                <Path
+                <AbsPath
                   d={`M ${x},${y}
                       L ${x + barWidth},${y}
                       L ${x + barWidth},${y + barHeight - borderRadius}
@@ -92,7 +106,7 @@ export function StackedBars({
                 />
               ) : (
                 // Middle segment - no rounded corners
-                <Rect x={x} y={y} width={barWidth} height={barHeight} fill={serieColor} />
+                <AbsRect x={x} y={y} width={barWidth} height={barHeight} fill={serieColor} />
               )}
             </React.Fragment>
           )

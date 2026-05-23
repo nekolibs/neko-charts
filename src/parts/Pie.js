@@ -1,4 +1,5 @@
-import { Path, G } from 'react-native-svg'
+import { AbsG } from '../abstractions/G'
+import { AbsPath } from '../abstractions/Path'
 
 import { getColorFromScale } from '../_helpers/colors'
 import { useColorsScale, useTheme } from '../NekoChartTheme'
@@ -11,29 +12,98 @@ function polarToCartesian(cx, cy, r, angleInDegrees) {
   }
 }
 
-function createArcPath(cx, cy, outerR, innerR, startAngle, endAngle) {
+function createArcPath(cx, cy, outerR, innerR, startAngle, endAngle, cr) {
   const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1'
+  const angleDeg = endAngle - startAngle
+  const maxCr = cr ? Math.min(cr, (angleDeg * Math.PI * outerR) / 360 / 2) : 0
+  const outerAngleOffset = maxCr > 0 ? (maxCr / outerR) * (180 / Math.PI) : 0
 
   if (innerR === 0) {
-    // Pie slice
-    const start = polarToCartesian(cx, cy, outerR, endAngle)
-    const end = polarToCartesian(cx, cy, outerR, startAngle)
-    return `M${cx},${cy} L${start.x},${start.y} A${outerR},${outerR} 0 ${largeArcFlag} 0 ${end.x},${end.y} Z`
-  } else {
-    // Donut slice
-    const startOuter = polarToCartesian(cx, cy, outerR, endAngle)
-    const endOuter = polarToCartesian(cx, cy, outerR, startAngle)
-    const startInner = polarToCartesian(cx, cy, innerR, startAngle)
-    const endInner = polarToCartesian(cx, cy, innerR, endAngle)
+    const arcStart = polarToCartesian(cx, cy, outerR, endAngle - outerAngleOffset)
+    const arcEnd = polarToCartesian(cx, cy, outerR, startAngle + outerAngleOffset)
+    const arcLargeFlag = (endAngle - outerAngleOffset) - (startAngle + outerAngleOffset) <= 180 ? '0' : '1'
+
+    if (maxCr <= 0) {
+      const start = polarToCartesian(cx, cy, outerR, endAngle)
+      const end = polarToCartesian(cx, cy, outerR, startAngle)
+      return `M${cx},${cy} L${start.x},${start.y} A${outerR},${outerR} 0 ${largeArcFlag} 0 ${end.x},${end.y} Z`
+    }
+
+    const cornerStart = polarToCartesian(cx, cy, outerR, endAngle)
+    const cornerEnd = polarToCartesian(cx, cy, outerR, startAngle)
+    const lineToStart = lerp(cx, cy, cornerStart.x, cornerStart.y, maxCr)
+    const lineFromEnd = lerp(cx, cy, cornerEnd.x, cornerEnd.y, maxCr)
+    const tipStart = polarToCartesian(cx, cy, maxCr, endAngle)
+    const tipEnd = polarToCartesian(cx, cy, maxCr, startAngle)
 
     return [
-      `M${startOuter.x},${startOuter.y}`,
-      `A${outerR},${outerR} 0 ${largeArcFlag} 0 ${endOuter.x},${endOuter.y}`,
-      `L${startInner.x},${startInner.y}`,
-      `A${innerR},${innerR} 0 ${largeArcFlag} 1 ${endInner.x},${endInner.y}`,
+      `M${tipStart.x},${tipStart.y}`,
+      `L${lineToStart.x},${lineToStart.y}`,
+      `Q${cornerStart.x},${cornerStart.y} ${arcStart.x},${arcStart.y}`,
+      `A${outerR},${outerR} 0 ${arcLargeFlag} 0 ${arcEnd.x},${arcEnd.y}`,
+      `Q${cornerEnd.x},${cornerEnd.y} ${lineFromEnd.x},${lineFromEnd.y}`,
+      `L${tipEnd.x},${tipEnd.y}`,
+      `Q${cx},${cy} ${tipStart.x},${tipStart.y}`,
+      'Z',
+    ].join(' ')
+  } else {
+    const radialLength = outerR - innerR
+    const innerArcLen = (angleDeg * Math.PI * innerR) / 360
+    const donutCr = maxCr > 0 ? Math.min(maxCr, radialLength / 2, innerArcLen / 2) : 0
+    const innerAngleOffset = donutCr > 0 ? (donutCr / innerR) * (180 / Math.PI) : 0
+    const donutOuterAngleOffset = donutCr > 0 ? (donutCr / outerR) * (180 / Math.PI) : 0
+
+    if (donutCr <= 0) {
+      const startOuter = polarToCartesian(cx, cy, outerR, endAngle)
+      const endOuter = polarToCartesian(cx, cy, outerR, startAngle)
+      const startInner = polarToCartesian(cx, cy, innerR, startAngle)
+      const endInner = polarToCartesian(cx, cy, innerR, endAngle)
+      return [
+        `M${startOuter.x},${startOuter.y}`,
+        `A${outerR},${outerR} 0 ${largeArcFlag} 0 ${endOuter.x},${endOuter.y}`,
+        `L${startInner.x},${startInner.y}`,
+        `A${innerR},${innerR} 0 ${largeArcFlag} 1 ${endInner.x},${endInner.y}`,
+        'Z',
+      ].join(' ')
+    }
+
+    const outerStart = polarToCartesian(cx, cy, outerR, endAngle)
+    const outerArcStart = polarToCartesian(cx, cy, outerR, endAngle - donutOuterAngleOffset)
+    const outerArcEnd = polarToCartesian(cx, cy, outerR, startAngle + donutOuterAngleOffset)
+    const outerEnd = polarToCartesian(cx, cy, outerR, startAngle)
+    const innerStart = polarToCartesian(cx, cy, innerR, startAngle)
+    const innerArcStart = polarToCartesian(cx, cy, innerR, startAngle + innerAngleOffset)
+    const innerArcEnd = polarToCartesian(cx, cy, innerR, endAngle - innerAngleOffset)
+    const innerEnd = polarToCartesian(cx, cy, innerR, endAngle)
+    const outerArcFlag = (endAngle - donutOuterAngleOffset) - (startAngle + donutOuterAngleOffset) <= 180 ? '0' : '1'
+    const innerArcFlag = (endAngle - innerAngleOffset) - (startAngle + innerAngleOffset) <= 180 ? '0' : '1'
+
+    const rStartFromOuter = lerp(innerStart.x, innerStart.y, outerEnd.x, outerEnd.y, donutCr)
+    const rStartFromInner = lerp(outerEnd.x, outerEnd.y, innerStart.x, innerStart.y, donutCr)
+    const rEndFromInner = lerp(outerStart.x, outerStart.y, innerEnd.x, innerEnd.y, donutCr)
+    const rEndFromOuter = lerp(innerEnd.x, innerEnd.y, outerStart.x, outerStart.y, donutCr)
+
+    return [
+      `M${outerArcStart.x},${outerArcStart.y}`,
+      `A${outerR},${outerR} 0 ${outerArcFlag} 0 ${outerArcEnd.x},${outerArcEnd.y}`,
+      `Q${outerEnd.x},${outerEnd.y} ${rStartFromOuter.x},${rStartFromOuter.y}`,
+      `L${rStartFromInner.x},${rStartFromInner.y}`,
+      `Q${innerStart.x},${innerStart.y} ${innerArcStart.x},${innerArcStart.y}`,
+      `A${innerR},${innerR} 0 ${innerArcFlag} 1 ${innerArcEnd.x},${innerArcEnd.y}`,
+      `Q${innerEnd.x},${innerEnd.y} ${rEndFromInner.x},${rEndFromInner.y}`,
+      `L${rEndFromOuter.x},${rEndFromOuter.y}`,
+      `Q${outerStart.x},${outerStart.y} ${outerArcStart.x},${outerArcStart.y}`,
       'Z',
     ].join(' ')
   }
+}
+
+function lerp(x1, y1, x2, y2, dist) {
+  const dx = x2 - x1, dy = y2 - y1
+  const len = Math.sqrt(dx * dx + dy * dy)
+  if (len === 0) return { x: x1, y: y1 }
+  const t = 1 - dist / len
+  return { x: x1 + dx * t, y: y1 + dy * t }
 }
 
 export function Pie({
@@ -47,8 +117,9 @@ export function Pie({
   paddingRight = 0,
   paddingTop = 0,
   paddingBottom = 0,
-  innerRadiusRatio = 0, // 0 for pie, 0.6 for donut (ratio of outer radius)
-  sliceSpacing = 0, // Space between slices in degrees
+  innerRadiusRatio = 0,
+  sliceSpacing = 0,
+  cornerRadius = 0,
   hide,
   theme,
 }) {
@@ -68,24 +139,38 @@ export function Pie({
   const centerY = ySpace + paddingTop + availableHeight / 2
   const total = data.reduce((sum, item) => sum + item.y, 0)
 
+  const effectiveOuterRadius = sliceSpacing > 0 ? outerRadius - sliceSpacing : outerRadius
+  const effectiveInnerRadius = innerRadiusRatio > 0 ? effectiveOuterRadius * innerRadiusRatio : 0
   let cumulativeAngle = 0
 
   return (
-    <G transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
+    <AbsG transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
       {data.map((slice, i) => {
         const color = slice.color || getColorFromScale(colors, i) || '#818DF9'
-        const startAngle = cumulativeAngle + sliceSpacing / 2
-        const angle = (slice.y / total) * 360 - sliceSpacing
+        const angle = (slice.y / total) * 360
+        const startAngle = cumulativeAngle
         const endAngle = startAngle + angle
-        cumulativeAngle += (slice.y / total) * 360
+        cumulativeAngle += angle
 
-        // Skip if angle is too small (happens with spacing)
         if (angle <= 0) return null
 
-        const path = createArcPath(outerRadius, outerRadius, outerRadius, innerRadius, startAngle, endAngle)
+        const midAngle = startAngle + angle / 2
+        const rad = ((midAngle - 90) * Math.PI) / 180
+        const dx = sliceSpacing > 0 ? sliceSpacing * Math.cos(rad) : 0
+        const dy = sliceSpacing > 0 ? sliceSpacing * Math.sin(rad) : 0
 
-        return <Path key={`pie-slice-${i}`} d={path} fill={color} />
+        const path = createArcPath(
+          outerRadius + dx,
+          outerRadius + dy,
+          effectiveOuterRadius,
+          effectiveInnerRadius,
+          startAngle,
+          endAngle,
+          cornerRadius,
+        )
+
+        return <AbsPath key={`pie-slice-${i}`} d={path} fill={color} />
       })}
-    </G>
+    </AbsG>
   )
 }

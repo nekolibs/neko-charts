@@ -1,4 +1,4 @@
-import { Text as SvgText } from 'react-native-svg'
+import { AbsSvgText } from '../abstractions/SvgText'
 import React from 'react'
 
 import { formatLargeNumber } from '../_helpers/numbers'
@@ -14,7 +14,8 @@ export function RadarLabelsChart({
   paddingRight = 0,
   paddingTop = 0,
   paddingBottom = 0,
-  showLabels = true,
+  labels = true,
+  suggestedMax: suggestedMaxProp,
   hide,
   theme,
 }) {
@@ -28,13 +29,14 @@ export function RadarLabelsChart({
   const centerX = xSpace + paddingLeft + availableWidth / 2
   const centerY = ySpace + paddingTop + availableHeight / 2
 
-  // Find max value across all series
-  const maxValue = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  // Find max value across all series (soft max — expands if data exceeds)
+  const dataMax = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
+  const maxValue = suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax
 
   // Use first series for structure
   const axisLabels = series[0]?.data || []
   const angleSlice = (Math.PI * 2) / axisLabels.length
-  const radius = size / 2 - (showLabels ? 30 : 10)
+  const radius = size / 2 - (labels ? 30 : 10)
 
   const getPoint = (value, index) => {
     const angle = angleSlice * index - Math.PI / 2
@@ -53,7 +55,7 @@ export function RadarLabelsChart({
             {serie.data.map((d, i) => {
               const point = getPoint(d.y, i)
               return (
-                <SvgText
+                <AbsSvgText
                   key={`${serie.name}-value-${i}`}
                   x={point.x}
                   y={point.y - 8}
@@ -63,7 +65,7 @@ export function RadarLabelsChart({
                   alignmentBaseline="baseline"
                 >
                   {formatLargeNumber(d.y)}
-                </SvgText>
+                </AbsSvgText>
               )
             })}
           </React.Fragment>

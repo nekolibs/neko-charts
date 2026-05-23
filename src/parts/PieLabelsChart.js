@@ -1,4 +1,5 @@
-import { Text as SvgText, G } from 'react-native-svg'
+import { AbsG } from '../abstractions/G'
+import { AbsSvgText } from '../abstractions/SvgText'
 
 import { useTheme } from '../NekoChartTheme'
 
@@ -20,13 +21,15 @@ export function PieLabelsChart({
   paddingRight = 0,
   paddingTop = 0,
   paddingBottom = 0,
-  innerRadiusRatio = 0, // 0 for pie, 0.6 for donut (ratio of outer radius)
-  sliceSpacing = 0, // Space between slices in degrees
+  innerRadiusRatio = 0,
+  sliceSpacing = 0,
+  labelSize,
   hide,
   theme,
 }) {
   theme = useTheme(theme)
   if (!!hide) return false
+  const effectiveLabelSize = labelSize ?? theme.labelSize
 
   // Use the actual available space for the pie
   const availableWidth = width - xSpace * 2 - paddingLeft - paddingRight
@@ -43,7 +46,7 @@ export function PieLabelsChart({
   let cumulativeAngle = 0
 
   return (
-    <G transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
+    <AbsG transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
       {data.map((slice, i) => {
         const startAngle = cumulativeAngle + sliceSpacing / 2
         const angle = (slice.y / total) * 360 - sliceSpacing
@@ -60,20 +63,20 @@ export function PieLabelsChart({
         const labelPos = polarToCartesian(outerRadius, outerRadius, labelRadius, midAngle)
 
         return (
-          <SvgText
+          <AbsSvgText
             key={`pie-label-${i}`}
             x={labelPos.x}
             y={labelPos.y}
             fill="#fff"
-            fontSize={Math.min(theme.labelSize, size * 0.05)}
+            fontSize={Math.min(effectiveLabelSize, size * 0.05)}
             fontWeight="bold"
             textAnchor="middle"
             alignmentBaseline="middle"
           >
             {slice.x}
-          </SvgText>
+          </AbsSvgText>
         )
       })}
-    </G>
+    </AbsG>
   )
 }

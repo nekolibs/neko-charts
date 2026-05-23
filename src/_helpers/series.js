@@ -12,7 +12,6 @@ import {
   pick,
   pipe,
   prop,
-  sortBy,
   toPairs,
   values,
 } from 'ramda'
@@ -33,20 +32,20 @@ export const formatChartSeries = (input) => {
     Array.isArray(input[0].data) &&
     input[0].data[0]?.x !== undefined &&
     input[0].data[0]?.y !== undefined
-  if (isShape0) return input
+  if (isShape0) return input.map(s => ({ ...s, serie: s.serie || s.name, name: s.name || s.serie }))
 
   const shape1 = hasValue(input[0]?.x) && hasValue(input[0]?.y) && !hasValue(input[0]?.serie)
-  if (shape1) return [{ data: input }]
+  if (shape1) return [{ serie: '', name: '', data: input }]
 
   let index = 0
   const toOutput = pipe(
     mapObjIndexed((pts, name) => ({
+      serie: name,
       name,
-      data: sortBy(prop('x'), pts).map((item) => ({ ...item, serie: name, serieIndex: index })),
+      data: pts.map((item) => ({ ...item, serie: name, serieIndex: index })),
       index: index++,
     })),
-    values,
-    sortBy(prop('name'))
+    values
   )
 
   const shape2 = allPass([has('x'), complement(has('serie'))])(head(input))
@@ -55,7 +54,10 @@ export const formatChartSeries = (input) => {
       pipe(
         omit(['x']),
         toPairs,
-        map(([name, y]) => ({ name, x: row.x, y }))
+        map(([name, v]) => {
+          const isObj = v && typeof v === 'object'
+          return { name, x: row.x, y: isObj ? v.value : v, ...(isObj && v.color ? { color: v.color } : {}) }
+        })
       )(row)
 
     const grouped = pipe(chain(expandw), groupBy(prop('name')))(input)

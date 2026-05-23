@@ -1,5 +1,5 @@
-import { G } from 'react-native-svg'
-import { Platform } from 'react-native'
+import { AbsG } from '../abstractions/G'
+import { Platform } from '@neko-os/ui'
 import { useState, useRef, useMemo, useCallback } from 'react'
 
 import { RadarAxisInteractive } from './RadarAxisInteractive'
@@ -23,7 +23,7 @@ export function RadarTooltip({
   paddingRight = 0,
   paddingTop = 0,
   paddingBottom = 0,
-  showLabels = true,
+  labels = true,
   hide,
   tooltipWidth,
   tooltipPadding = 8,
@@ -144,7 +144,7 @@ export function RadarTooltip({
   }, [hoveredData, series, colors])
 
   return (
-    <G onMouseMove={handleMouseMove}>
+    <AbsG onMouseMove={handleMouseMove}>
       <RadarAxisInteractive
         series={series}
         width={width}
@@ -155,7 +155,7 @@ export function RadarTooltip({
         paddingRight={paddingRight}
         paddingTop={paddingTop}
         paddingBottom={paddingBottom}
-        showLabels={showLabels}
+        labels={labels}
         onAxisHover={handleHover}
         onAxisHoverOut={handleHoverOut}
       />
@@ -171,6 +171,6 @@ export function RadarTooltip({
           theme={theme}
         />
       )}
-    </G>
+    </AbsG>
   )
 }

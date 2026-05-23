@@ -3,5 +3,6 @@ export * from './NekoChart'
 export * from './NekoChartTheme'
 export * from './ResponsiveChartWrapper'
 export * from './simple'
+export * from './parts'
 
 export const cversion = 24

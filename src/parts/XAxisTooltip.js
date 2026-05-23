@@ -1,5 +1,6 @@
-import { G, Line } from 'react-native-svg'
-import { Platform } from 'react-native'
+import { AbsG } from '../abstractions/G'
+import { AbsLine } from '../abstractions/Line'
+import { Platform } from '@neko-os/ui'
 import { useState, useRef, useMemo, useCallback } from 'react'
 
 import { AxisInteractive } from './AxisInteractive'
@@ -27,7 +28,7 @@ export function XAxisTooltip({
   hide,
   tooltipWidth,
   tooltipPadding = 8,
-  showVerticalLine = true,
+  verticalLine = true,
   theme,
 }) {
   theme = useTheme(theme)
@@ -138,19 +139,21 @@ export function XAxisTooltip({
   const tooltipItems = useMemo(() => {
     if (!hoveredData) return []
 
+    const hasLabels = hoveredData.values.some(v => v.serie)
+
     return hoveredData.values.map((value, index) => {
       const serieColor = series[index]?.color || getColorFromScale(colors, index) || '#818DF9'
 
       return {
-        label: value.serie,
+        label: value.serie || '',
         value: value.y,
-        color: serieColor,
+        color: hasLabels ? serieColor : undefined,
       }
     })
   }, [hoveredData, series, colors])
 
   return (
-    <G onMouseMove={handleMouseMove}>
+    <AbsG onMouseMove={handleMouseMove}>
       <AxisInteractive
         series={series}
         width={width}
@@ -169,8 +172,8 @@ export function XAxisTooltip({
       {hoveredData && (
         <>
           {/* Vertical line at hovered position */}
-          {showVerticalLine && (
-            <Line
+          {verticalLine && (
+            <AbsLine
               x1={verticalLineX}
               y1={ySpace + paddingTop}
               x2={verticalLineX}
@@ -194,6 +197,6 @@ export function XAxisTooltip({
           />
         </>
       )}
-    </G>
+    </AbsG>
   )
 }

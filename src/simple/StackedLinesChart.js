@@ -8,16 +8,16 @@ import { StackedLines } from '../parts/StackedLines'
 import { StackedScatters } from '../parts/StackedScatters'
 import { StackedTotalLabelsChart } from '../parts/StackedTotalLabelsChart'
 
-export function SimpleStackedLinesChart({ showTotals = false, area = false, showValues = true, xSpace = 15, ...props }) {
+export function StackedLinesChart({ legend = false, legendPosition = 'bottom', totals = false, area = true, dots = false, dotSize, values = false, xSpace = 15, ...props }) {
   return (
-    <LegendWrapper {...props}>
+    <LegendWrapper legendPosition={legend ? legendPosition : undefined} {...props}>
       <NekoChart xSpace={15} {...props}>
-        <Axis {...props}>
+        <Axis stacked {...props}>
           <StackedLines {...props} />
-          <StackedScatters {...props} />
+          <StackedScatters hide={!dots} dotSize={dotSize} {...props} />
           <StackedAreas hide={!area} {...props} />
-          <StackedLabelsChart hide={!showValues} {...props} />
-          <StackedTotalLabelsChart hide={!showTotals} {...props} />
+          <StackedLabelsChart hide={!values} {...props} />
+          <StackedTotalLabelsChart hide={!totals} {...props} />
           <AxisInteractive {...props} />
         </Axis>
       </NekoChart>
@@ -25,4 +25,4 @@ export function SimpleStackedLinesChart({ showTotals = false, area = false, show
   )
 }
 
-export const SimpleStackedAreasChart = (props) => <SimpleStackedLinesChart {...props} area />
+export const StackedAreasChart = (props) => <StackedLinesChart {...props} area />

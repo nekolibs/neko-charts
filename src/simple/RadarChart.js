@@ -7,16 +7,17 @@ import { RadarLabelsChart } from '../parts/RadarLabelsChart'
 import { RadarTooltip } from '../parts/RadarTooltip'
 import { SquareWrapper } from '../parts/SquareWrapper'
 
-export function SimpleRadarChart({ height = 400, showValues = true, showLabels = true, showTooltip = true, ...props }) {
+export function RadarChart({ size, legend = false, legendPosition = 'bottom', values = false, labels = false, tooltip = false, ...props }) {
+  if (size) { props.width = size; props.height = size }
   return (
-    <LegendWrapper {...props}>
-      <NekoChart height={height} showLabels={showLabels} showValues={showValues} {...props}>
+    <LegendWrapper legendPosition={legend ? legendPosition : undefined} {...props}>
+      <NekoChart labels={labels} values={values} {...props}>
         <SquareWrapper {...props}>
           <RadarAxis {...props} />
           <Radar {...props} />
-          <RadarLabelsChart hide={!showValues} {...props} />
+          <RadarLabelsChart hide={!values} {...props} />
           <RadarAxisInteractive {...props} />
-          <RadarTooltip hide={!showTooltip} showLabels={showLabels} {...props} />
+          <RadarTooltip hide={!tooltip} labels={labels} {...props} />
         </SquareWrapper>
       </NekoChart>
     </LegendWrapper>

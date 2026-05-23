@@ -1,4 +1,4 @@
-import { Circle } from 'react-native-svg'
+import { AbsCircle } from '../abstractions/Circle'
 import React from 'react'
 
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
@@ -6,7 +6,8 @@ import { getColorFromScale } from '../_helpers/colors'
 import { useColorsScale, useTheme } from '../NekoChartTheme'
 
 export function StackedScatters({
-  series,
+  series: seriesRaw,
+  pick,
   colorsScale,
   width,
   height,
@@ -18,6 +19,11 @@ export function StackedScatters({
   paddingBottom = 0,
   spaceAround = false,
   hide,
+  dotSize,
+  suggestedMax: suggestedMaxProp,
+  max: maxProp,
+  suggestedMin: suggestedMinProp,
+  min: minProp,
   theme,
 }) {
   const colors = useColorsScale(colorsScale)
@@ -29,7 +35,12 @@ export function StackedScatters({
   const chartHeight = height - ySpace * 2 - paddingTop - paddingBottom
 
   // Find max value (sum of all series at each point)
-  const maxValue = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
+  const dataMax = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
+  const rawMin = Math.min(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
+  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
+  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
   const xPoints = series[0]?.data?.length || 0
 
   // Calculate stepX based on spaceAround setting
@@ -45,7 +56,7 @@ export function StackedScatters({
   return (
     <>
       {series.map((serie, serieIndex) => {
-        const serieColor = serie.color || getColorFromScale(colors, serieIndex) || '#818DF9'
+        const serieColor = serie.color || getColorFromScale(colors, seriesRaw.findIndex(s => s.name === serie.name)) || '#818DF9'
 
         return (
           <React.Fragment key={`${serie.name}-points`}>
@@ -59,9 +70,9 @@ export function StackedScatters({
               const y =
                 ySpace +
                 paddingTop +
-                (chartHeight - (cumulativeValue / maxValue) * (chartHeight - CHART_PADDING_TOP) - CHART_PADDING_BOTTOM)
+                (chartHeight - ((cumulativeValue - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
-              return <Circle key={`${serie.name}-point-${i}`} cx={x} cy={y} r={theme.pointSize} fill={serieColor} />
+              return <AbsCircle key={`${serie.name}-point-${i}`} cx={x} cy={y} r={dotSize || theme.pointSize} fill={serieColor} />
             })}
           </React.Fragment>
         )
