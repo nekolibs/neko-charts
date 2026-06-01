@@ -29,7 +29,7 @@ src/
 │   ├── SimpleStackedBarsChart.js
 │   └── SimpleStackedLinesChart.js
 ├── parts/                      # Internal building blocks (axis, bars, lines, pie slices, legends, tooltips, labels)
-└── _helpers/                   # Pure utility functions (colors, series formatting, axis math, dates, numbers)
+└── _helpers/                   # Pure utility functions (colors, series formatting, axis math, dates, numbers, fillDates)
 ```
 
 ## Architecture
@@ -115,3 +115,8 @@ Babel config uses `metro-react-native-babel-preset` with ESM output (`disableImp
 - **Pie slice spacing**: Translates each slice outward along its angular bisector by `sliceSpacing` pixels. Outer radius reduced by same amount to compensate. Produces even gaps (not angular reduction which widens at edges).
 - **Pie corner radius**: Quadratic bezier curves (`Q` SVG command) at corners where straight edges meet arcs. `maxCr` is clamped to half the arc length to prevent overlap on small slices. Works for both pie (center point) and donut (inner/outer arcs) shapes.
 - **Legend layout**: `LegendWrapper` uses neko-ui `View row={vertical}` modifier (not `style.flexDirection`), because neko-ui View's base `flexDirection: column` overrides style prop. Chart container uses `flex: 4` with `alignSelf: 'stretch'` to prevent collapse in row layouts.
+- **Date gap-filling** (`_helpers/fillDates.js`): When `fillEmptyDates=true` is passed to any chart, `NekoChart.js → Content` calls `fillSeriesDates(series, { xMin, xMax, datesPeriod, fillValue })` after `formatChartSeries`. Detects period from smallest gap between sorted dates (hour/day/week/month/quarter/year). Generates ISO date sequence between bounds, fills missing points per-series with `fillValue` (default `null`). Multi-series uses union of all x values. Non-date x values pass through unchanged. All parts (Bars, Lines, Axis, etc.) automatically consume the filled `series` via prop spreading — no part-level changes needed.
+- **Bar corner rounding** (`_helpers/bar.js`): `roundedBarPath(x, y, w, h, r, { top, bottom })` clamps radius to `min(r, w/2, h/2)` internally to prevent small bars from rendering as ellipses (which `<rect rx>` would do). Returns SVG path with rounded corners only on specified sides. Used by both Bars and StackedBars — StackedBars passes `top: isLastSegment, bottom: isFirstSegment` so middle segments stay flat.
+- **Bar spacing**: Dynamic default `Math.max(2, Math.min(groupWidth * 0.15, 15))` — scales with number of bars and chart width. Override with `barSpacing` prop. Applied consistently across Bars, StackedBars, BarsLabels, StackedBarsLabelsChart to keep labels aligned with bars.
+- **X label thinning** (`Axis.js`): Uses `estimateLabelWidth(formattedLabels, fontSize)` from `_helpers/colors.js` — estimates pixel width from longest label × `fontSize * 0.6` + gap. Avoids hiding short labels (e.g. "Mon", "3w") which old hardcoded 60px minimum would skip.
+- **Chart top padding**: `CHART_PADDING_TOP = 8` default (minimal), `CHART_PADDING_TOP_LABELS = 20` (when `values` enabled in Simple charts). Override via `chartPaddingTop` prop. All parts use `chartPaddingTop ?? CHART_PADDING_TOP` for consistent Y scaling.
