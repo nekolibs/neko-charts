@@ -1,10 +1,12 @@
 import React from 'react'
 
+import { fillSeriesDates } from './_helpers/fillDates'
 import { formatChartSeries } from './_helpers/series'
 import { useResolveColor } from './NekoChartTheme'
 import ResponsiveChartWrapper from './ResponsiveChartWrapper'
 
-export const CHART_PADDING_TOP = 40
+export const CHART_PADDING_TOP = 8
+export const CHART_PADDING_TOP_LABELS = 20
 export const CHART_PADDING_BOTTOM = 10
 
 function resolveSeriesColors(series, resolve) {
@@ -15,9 +17,12 @@ function resolveSeriesColors(series, resolve) {
   }))
 }
 
-function Content({ height, width, children, data, ...props }) {
+function Content({ height, width, children, data, series: seriesProp, fillEmptyDates, datesPeriod, xMin, xMax, fillValue, ...props }) {
   const resolve = useResolveColor()
-  const series = resolveSeriesColors(formatChartSeries(data), resolve)
+  let series = resolveSeriesColors(seriesProp || formatChartSeries(data), resolve)
+  if (fillEmptyDates) {
+    series = fillSeriesDates(series, { xMin, xMax, datesPeriod, fillValue })
+  }
   props = { width, height, data, series, ...props }
 
   return React.Children.map(children, (child) => React.cloneElement(child, props))
