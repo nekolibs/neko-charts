@@ -2,7 +2,7 @@ import { View, Text } from '@neko-os/ui'
 
 import { formatChartSeries } from '../_helpers/series'
 import { getColorFromScale } from '../_helpers/colors'
-import { useColorsScale, useTheme } from '../NekoChartTheme'
+import { useColorsScale, useResolveColor, useTheme } from '../NekoChartTheme'
 
 const POSITIONS = {
   bottom: { bottom: 30, left: 0, right: 0 },
@@ -23,6 +23,7 @@ export function Legend({
   hide,
 }) {
   const colors = useColorsScale(colorsScale)
+  const resolve = useResolveColor()
   theme = useTheme(theme)
   if (!!hide) return false
   series = formatChartSeries(data)
@@ -33,7 +34,7 @@ export function Legend({
       {data?.map((item, index) => {
         let label = item.name || item.label || item.x || item.serie
         // label = formatLabel(label, item.y, { prefix, sufix, fields, total })
-        const color = getColorFromScale(colors, index)
+        const color = resolve(item.color) || getColorFromScale(colors, index)
 
         return (
           <View key={index} row centerV gap="xs">

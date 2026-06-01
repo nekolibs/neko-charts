@@ -2,7 +2,7 @@ import { AbsG } from '../abstractions/G'
 import { AbsPath } from '../abstractions/Path'
 
 import { getColorFromScale } from '../_helpers/colors'
-import { useColorsScale, useTheme } from '../NekoChartTheme'
+import { useColorsScale, useResolveColor, useTheme } from '../NekoChartTheme'
 
 function polarToCartesian(cx, cy, r, angleInDegrees) {
   const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0
@@ -24,6 +24,11 @@ function createArcPath(cx, cy, outerR, innerR, startAngle, endAngle, cr) {
     const arcLargeFlag = (endAngle - outerAngleOffset) - (startAngle + outerAngleOffset) <= 180 ? '0' : '1'
 
     if (maxCr <= 0) {
+      if (angleDeg >= 359.99) {
+        const p1 = polarToCartesian(cx, cy, outerR, startAngle)
+        const p2 = polarToCartesian(cx, cy, outerR, startAngle + 180)
+        return `M${p1.x},${p1.y} A${outerR},${outerR} 0 0 0 ${p2.x},${p2.y} A${outerR},${outerR} 0 0 0 ${p1.x},${p1.y} Z`
+      }
       const start = polarToCartesian(cx, cy, outerR, endAngle)
       const end = polarToCartesian(cx, cy, outerR, startAngle)
       return `M${cx},${cy} L${start.x},${start.y} A${outerR},${outerR} 0 ${largeArcFlag} 0 ${end.x},${end.y} Z`
@@ -54,6 +59,22 @@ function createArcPath(cx, cy, outerR, innerR, startAngle, endAngle, cr) {
     const donutOuterAngleOffset = donutCr > 0 ? (donutCr / outerR) * (180 / Math.PI) : 0
 
     if (donutCr <= 0) {
+      if (angleDeg >= 359.99) {
+        const mid = startAngle + 180
+        const o1 = polarToCartesian(cx, cy, outerR, startAngle)
+        const o2 = polarToCartesian(cx, cy, outerR, mid)
+        const i1 = polarToCartesian(cx, cy, innerR, startAngle)
+        const i2 = polarToCartesian(cx, cy, innerR, mid)
+        return [
+          `M${o1.x},${o1.y}`,
+          `A${outerR},${outerR} 0 0 0 ${o2.x},${o2.y}`,
+          `A${outerR},${outerR} 0 0 0 ${o1.x},${o1.y}`,
+          `L${i1.x},${i1.y}`,
+          `A${innerR},${innerR} 0 0 1 ${i2.x},${i2.y}`,
+          `A${innerR},${innerR} 0 0 1 ${i1.x},${i1.y}`,
+          'Z',
+        ].join(' ')
+      }
       const startOuter = polarToCartesian(cx, cy, outerR, endAngle)
       const endOuter = polarToCartesian(cx, cy, outerR, startAngle)
       const startInner = polarToCartesian(cx, cy, innerR, startAngle)
@@ -124,8 +145,12 @@ export function Pie({
   theme,
 }) {
   const colors = useColorsScale(colorsScale)
+  const resolve = useResolveColor()
   theme = useTheme(theme)
   if (!!hide) return false
+
+  const singleItem = data.filter(d => d.y > 0).length === 1
+  if (singleItem) cornerRadius = 0
 
   // Use the actual available space for the pie
   const availableWidth = width - xSpace * 2 - paddingLeft - paddingRight
@@ -146,7 +171,7 @@ export function Pie({
   return (
     <AbsG transform={`translate(${centerX - outerRadius}, ${centerY - outerRadius})`}>
       {data.map((slice, i) => {
-        const color = slice.color || getColorFromScale(colors, i) || '#818DF9'
+        const color = resolve(slice.color) || getColorFromScale(colors, i) || '#818DF9'
         const angle = (slice.y / total) * 360
         const startAngle = cumulativeAngle
         const endAngle = startAngle + angle

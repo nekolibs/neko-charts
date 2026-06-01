@@ -19,12 +19,35 @@ function polarToCartesian(cx, cy, r, angleInDegrees) {
 function createArcPath(cx, cy, outerR, innerR, startAngle, endAngle) {
   const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1'
 
+  const angleDeg = endAngle - startAngle
+
   if (innerR === 0) {
+    if (angleDeg >= 359.99) {
+      const p1 = polarToCartesian(cx, cy, outerR, startAngle)
+      const p2 = polarToCartesian(cx, cy, outerR, startAngle + 180)
+      return `M${p1.x},${p1.y} A${outerR},${outerR} 0 0 0 ${p2.x},${p2.y} A${outerR},${outerR} 0 0 0 ${p1.x},${p1.y} Z`
+    }
     // Pie slice
     const start = polarToCartesian(cx, cy, outerR, endAngle)
     const end = polarToCartesian(cx, cy, outerR, startAngle)
     return `M${cx},${cy} L${start.x},${start.y} A${outerR},${outerR} 0 ${largeArcFlag} 0 ${end.x},${end.y} Z`
   } else {
+    if (angleDeg >= 359.99) {
+      const mid = startAngle + 180
+      const o1 = polarToCartesian(cx, cy, outerR, startAngle)
+      const o2 = polarToCartesian(cx, cy, outerR, mid)
+      const i1 = polarToCartesian(cx, cy, innerR, startAngle)
+      const i2 = polarToCartesian(cx, cy, innerR, mid)
+      return [
+        `M${o1.x},${o1.y}`,
+        `A${outerR},${outerR} 0 0 0 ${o2.x},${o2.y}`,
+        `A${outerR},${outerR} 0 0 0 ${o1.x},${o1.y}`,
+        `L${i1.x},${i1.y}`,
+        `A${innerR},${innerR} 0 0 1 ${i2.x},${i2.y}`,
+        `A${innerR},${innerR} 0 0 1 ${i1.x},${i1.y}`,
+        'Z',
+      ].join(' ')
+    }
     // Donut slice
     const startOuter = polarToCartesian(cx, cy, outerR, endAngle)
     const endOuter = polarToCartesian(cx, cy, outerR, startAngle)
