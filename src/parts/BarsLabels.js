@@ -24,8 +24,11 @@ export function BarsLabels({
   suggestedMin: suggestedMinProp,
   min: minProp,
   theme,
+  chartPaddingTop,
+  barSpacing: barSpacingProp,
 }) {
   if (hide) return null
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
   theme = useTheme(theme)
   // Calculate chart dimensions
   const chartWidth = width - xSpace * 2 - paddingLeft - paddingRight
@@ -45,7 +48,7 @@ export function BarsLabels({
 
   // Calculate bar dimensions (same as BarsChart)
   const groupWidth = chartWidth / xPoints
-  const barSpacing = 4
+  const barSpacing = barSpacingProp ?? Math.max(2, Math.min(groupWidth * 0.15, 15))
   const barWidth = (groupWidth - barSpacing * (seriesCount + 1)) / seriesCount
 
   return (
@@ -53,10 +56,10 @@ export function BarsLabels({
       {/* Render value labels for each bar */}
       {series.map((serie, serieIndex) => {
         return serie.data.map((point, i) => {
-          const usableHeight = chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM
+          const usableHeight = chartHeight - _cpt - CHART_PADDING_BOTTOM
           const range = maxValue - minValue
           const barHeight = Math.abs(point.y / range) * usableHeight
-          const zeroY = ySpace + paddingTop + (maxValue / range) * usableHeight + CHART_PADDING_TOP
+          const zeroY = ySpace + paddingTop + (maxValue / range) * usableHeight + _cpt
 
           // Calculate grouped position (same as BarsChart)
           const x = xSpace + paddingLeft + i * groupWidth + serieIndex * (barWidth + barSpacing) + barSpacing

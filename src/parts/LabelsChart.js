@@ -3,6 +3,7 @@ import React from 'react'
 
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { formatLargeNumber } from '../_helpers/numbers'
+import { estimateLabelWidth } from '../_helpers/colors'
 import { useTheme } from '../NekoChartTheme'
 
 const VALUE_LABEL_OFFSET = 8
@@ -26,9 +27,11 @@ export function LabelsChart({
   min: minProp,
 
   theme,
+  chartPaddingTop,
 }) {
   theme = useTheme(theme)
   if (!!hide) return false
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
 
   // Calculate chart dimensions
   const chartWidth = width - xSpace * 2 - paddingLeft - paddingRight
@@ -54,7 +57,8 @@ export function LabelsChart({
   }
 
   // Calculate which labels to show based on available width
-  const minLabelWidth = 40 // Minimum pixels needed per label
+  const formattedValues = series.flatMap((s) => s.data.map((d) => formatLargeNumber(d.y)))
+  const minLabelWidth = estimateLabelWidth(formattedValues, theme.valueSize)
   const labelsToShow = Math.max(1, Math.floor(chartWidth / minLabelWidth))
   const interval = Math.ceil(xPoints / labelsToShow)
 
@@ -78,7 +82,7 @@ export function LabelsChart({
               const y =
                 ySpace +
                 paddingTop +
-                (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
+                (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
               return (
                 <AbsSvgText

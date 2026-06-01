@@ -25,7 +25,9 @@ export function Scatters({
   suggestedMin: suggestedMinProp,
   min: minProp,
   theme,
+  chartPaddingTop,
 }) {
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
   const colors = useColorsScale(colorsScale)
   theme = useTheme(theme)
   if (!!hide) return false
@@ -70,7 +72,7 @@ export function Scatters({
               const y =
                 ySpace +
                 paddingTop +
-                (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
+                (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
               return <AbsCircle key={`${serie.name}-point-${i}`} cx={x} cy={y} r={dotSize || theme.pointSize} fill={point.color || serieColor} />
             })}

@@ -22,7 +22,10 @@ export function Lines({
   max: maxProp,
   suggestedMin: suggestedMinProp,
   min: minProp,
+  chartPaddingTop,
+  lineWidth = 2,
 }) {
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
   const colors = useColorsScale(colorsScale)
 
   // Calculate chart dimensions
@@ -68,7 +71,7 @@ export function Lines({
           const y =
             ySpace +
             paddingTop +
-            (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
+            (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
           if (isFirstPoint) {
             linePath += `M${x},${y}`
@@ -80,7 +83,7 @@ export function Lines({
 
         return (
           <React.Fragment key={serie.name}>
-            <AbsPath d={linePath} fill="none" stroke={serieColor} strokeWidth={2} />
+            <AbsPath d={linePath} fill="none" stroke={serieColor} strokeWidth={lineWidth} strokeLinecap="round" strokeLinejoin="round" />
           </React.Fragment>
         )
       })}

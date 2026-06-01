@@ -22,9 +22,11 @@ export function StackedTotalLabelsChart({
   suggestedMin: suggestedMinProp,
   min: minProp,
   theme,
+  chartPaddingTop,
 }) {
   theme = useTheme(theme)
   if (!!hide) return false
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
 
   // Calculate chart dimensions
   const chartWidth = width - xSpace * 2 - paddingLeft - paddingRight
@@ -55,8 +57,8 @@ export function StackedTotalLabelsChart({
   return (
     <>
       {totals.map((total, i) => {
-        const totalHeight = (total / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
-        const minOffset = (-minValue / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
+        const totalHeight = (total / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM)
+        const minOffset = (-minValue / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM)
 
         const x = spaceAround
           ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space

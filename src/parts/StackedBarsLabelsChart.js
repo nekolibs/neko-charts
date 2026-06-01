@@ -22,9 +22,12 @@ export function StackedBarsLabelsChart({
   suggestedMin: suggestedMinProp,
   min: minProp,
   theme,
+  chartPaddingTop,
+  barSpacing: barSpacingProp,
 }) {
   theme = useTheme(theme)
   if (!!hide) return false
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
 
   // Calculate chart dimensions
   const chartWidth = width - xSpace * 2 - paddingLeft - paddingRight
@@ -43,21 +46,21 @@ export function StackedBarsLabelsChart({
 
   // Calculate bar dimensions - same as BarsChart
   const groupWidth = chartWidth / xPoints
-  const barSpacing = 4
+  const barSpacing = barSpacingProp ?? Math.max(2, Math.min(groupWidth * 0.15, 15))
   const barWidth = groupWidth - barSpacing * 2
 
   return (
     <>
       {series.map((serie, serieIndex) => {
         return serie.data.map((point, i) => {
-          const barHeight = (point.y / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
+          const barHeight = (point.y / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM)
 
           // Calculate stacked position - sum of all previous series at this point
           const previousHeight = series
             .slice(0, serieIndex)
-            .reduce((sum, s) => sum + ((s.data[i]?.y || 0) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM), 0)
+            .reduce((sum, s) => sum + ((s.data[i]?.y || 0) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM), 0)
 
-          const minOffset = (-minValue / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
+          const minOffset = (-minValue / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM)
           const x = xSpace + paddingLeft + i * groupWidth + barSpacing
           const y = ySpace + paddingTop + (chartHeight - barHeight - previousHeight - minOffset - CHART_PADDING_BOTTOM)
 

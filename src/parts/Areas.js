@@ -23,7 +23,9 @@ export function Areas({
   max: maxProp,
   suggestedMin: suggestedMinProp,
   min: minProp,
+  chartPaddingTop,
 }) {
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
   const colors = useColorsScale(colorsScale)
   if (!!hide) return false
 
@@ -72,7 +74,7 @@ export function Areas({
           const y =
             ySpace +
             paddingTop +
-            (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
+            (chartHeight - ((point.y - minValue) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM) - CHART_PADDING_BOTTOM)
 
           if (isFirstPoint) {
             firstX = x

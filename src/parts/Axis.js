@@ -6,6 +6,7 @@ import { AbsSvgText } from '../abstractions/SvgText'
 import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { useTheme } from '../NekoChartTheme'
 import { createXLabelFormatter, createYLabelFormatter } from '../_helpers/axis'
+import { estimateLabelWidth } from '../_helpers/colors'
 
 export function Axis({
   // Data and dimensions
@@ -45,9 +46,12 @@ export function Axis({
   // Custom formatters
   formatXLabel,
   formatYLabel,
+  datesPeriod,
+  chartPaddingTop,
   children,
   ...props
 }) {
+  const _cpt = chartPaddingTop ?? CHART_PADDING_TOP
   theme = useTheme(theme)
   const effectiveLabelSize = labelSize ?? theme.labelSize
 
@@ -79,7 +83,7 @@ export function Axis({
   const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
 
   // Create smart formatters if not provided
-  const smartXFormatter = formatXLabel || createXLabelFormatter(firstData)
+  const smartXFormatter = formatXLabel || createXLabelFormatter(firstData, datesPeriod)
   const smartYFormatter = formatYLabel || createYLabelFormatter()
 
   // Calculate stepX based on spaceAround setting
@@ -162,7 +166,7 @@ export function Axis({
       {/* Y Grid Lines */}
       {yGrid &&
         yAxisValues.map((value, i) => {
-          const scaledHeight = ((value - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
+          const scaledHeight = ((value - minValue) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM)
           const y = ySpace + paddingTop + (chartHeight - scaledHeight - CHART_PADDING_BOTTOM)
           return (
             <AbsLine
@@ -180,40 +184,34 @@ export function Axis({
 
       {/* X Labels */}
       {xLabels &&
-        firstData.map((point, i) => {
-          // Calculate minimum space needed per label (approximate)
-          const minLabelWidth = 60 // Minimum pixels needed per label
-          const totalLabels = firstData.length
-          const availableWidth = chartWidth
-          const labelsToShow = Math.max(2, Math.floor(availableWidth / minLabelWidth))
+        (() => {
+          const formattedLabels = firstData.map((p) => smartXFormatter(p.x))
+          const minLabelWidth = estimateLabelWidth(formattedLabels, effectiveLabelSize)
+          const labelsToShow = Math.max(2, Math.floor(chartWidth / minLabelWidth))
+          const interval = Math.ceil(firstData.length / labelsToShow)
 
-          // Calculate interval to skip labels
-          const interval = Math.ceil(totalLabels / labelsToShow)
+          return firstData.map((point, i) => {
+            if (i % interval !== 0) return null
 
-          // Show labels at the calculated interval
-          const shouldShowLabel = i % interval === 0
+            const x = spaceAround
+              ? xSpace + paddingLeft + i * stepX + stepX / 2
+              : xSpace + paddingLeft + i * stepX
 
-          if (!shouldShowLabel) return null
-
-          // Position based on spaceAround setting
-          const x = spaceAround
-            ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
-            : xSpace + paddingLeft + i * stepX // End-to-end spacing
-
-          return (
-            <AbsSvgText
-              key={`x-label-${i}`}
-              x={x}
-              y={height - 5}
-              fontSize={effectiveLabelSize}
-              fill={theme.labelColor}
-              alignmentBaseline="middle"
-              textAnchor="middle"
-            >
-              {smartXFormatter(point.x)}
-            </AbsSvgText>
-          )
-        })}
+            return (
+              <AbsSvgText
+                key={`x-label-${i}`}
+                x={x}
+                y={height - 5}
+                fontSize={effectiveLabelSize}
+                fill={theme.labelColor}
+                alignmentBaseline="middle"
+                textAnchor="middle"
+              >
+                {formattedLabels[i]}
+              </AbsSvgText>
+            )
+          })
+        })()}
 
       {/* Y Labels */}
       {yLabels &&
@@ -232,7 +230,7 @@ export function Axis({
 
           if (!shouldShowLabel) return null
 
-          const scaledHeight = ((value - minValue) / (maxValue - minValue)) * (chartHeight - CHART_PADDING_TOP - CHART_PADDING_BOTTOM)
+          const scaledHeight = ((value - minValue) / (maxValue - minValue)) * (chartHeight - _cpt - CHART_PADDING_BOTTOM)
           const y = ySpace + paddingTop + (chartHeight - scaledHeight - CHART_PADDING_BOTTOM)
 
           return (
@@ -263,6 +261,7 @@ export function Axis({
           xSpace,
           ySpace,
           spaceAround,
+          chartPaddingTop: _cpt,
           theme,
           ...props,
         })
