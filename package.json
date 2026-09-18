@@ -14,7 +14,7 @@
     "watch": "babel src --out-dir dist --extensions \".js,.jsx\" --copy-files --watch",
     "dev": "yarn build && yarn watch",
     "prepublishOnly": "yarn build",
-    "publish": "npm publish --access public"
+    "release": "npm publish --access public"
   },
   "publishConfig": {
     "access": "public"
