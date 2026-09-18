@@ -11,6 +11,9 @@ export function ProgressDonutChart({
   hideTrack,
   innerRadiusRatio = 0.75,
   label,
+  labelSize,
+  labelColor,
+  labelWeight = 800,
   ...props
 }) {
   const resolve = useResolveColor()
@@ -25,27 +28,11 @@ export function ProgressDonutChart({
   ]
 
   return (
-    <View style={{ width: size, height: size, position: 'relative' }}>
-      <DonutChart
-        data={data}
-        tooltip={false}
-        labels={false}
-        innerRadiusRatio={innerRadiusRatio}
-        {...props}
-      />
+    <View relative width={size} height={size}>
+      <DonutChart data={data} tooltip={false} labels={false} innerRadiusRatio={innerRadiusRatio} {...props} />
       {label !== false && (
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ fontSize: size * 0.3 }} strong center>
+        <View absoluteFill center>
+          <Text size={labelSize ?? Math.round(size * 0.22)} color={labelColor ?? color} weight={labelWeight} center>
             {label ?? `${pct}%`}
           </Text>
         </View>
