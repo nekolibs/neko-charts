@@ -7,7 +7,8 @@
   "react-native": "src/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "scripts": {
     "build": "rm -rf dist && babel src --out-dir dist --extensions \".js,.jsx\" --copy-files",

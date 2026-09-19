@@ -40,3 +40,8 @@ export { RadarAxis } from './RadarAxis'
 export { RadarAxisInteractive } from './RadarAxisInteractive'
 export { RadarLabelsChart } from './RadarLabelsChart'
 export { RadarTooltip } from './RadarTooltip'
+
+// Muscle Heatmap
+export { MuscleMap } from './MuscleMap'
+export { MuscleMapTooltip } from './MuscleMapTooltip'
+export { HeatmapLegend } from './HeatmapLegend'
