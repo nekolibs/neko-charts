@@ -8,13 +8,13 @@ const POSITIONS = {
   topRight: { top: 20, right: 50 },
 }
 
-export function LegendWrapper({ legendPosition, legendFields, width, height, children, ...props }) {
+export function LegendWrapper({ legendPosition, legendFields, LegendComponent = Legend, width, height, children, ...props }) {
   let before = false
   let after = false
 
   const vertical = ['left', 'right'].includes(legendPosition)
-  if (['top', 'left'].includes(legendPosition)) before = <Legend vertical={vertical} {...props} />
-  if (['bottom', 'right'].includes(legendPosition)) after = <Legend vertical={vertical} {...props} />
+  if (['top', 'left'].includes(legendPosition)) before = <LegendComponent vertical={vertical} {...props} />
+  if (['bottom', 'right'].includes(legendPosition)) after = <LegendComponent vertical={vertical} {...props} />
 
   const isFixed = width > 0 && height > 0
 
