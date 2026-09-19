@@ -19,7 +19,7 @@ export function Tooltip({
   padding = 8,
   opacity = 0.85,
 }) {
-  if (!visible || !items.length) return null
+  if (!visible || (!items.length && !title)) return null
 
   const lineHeight = theme.tooltipSize + 4
   const tooltipHeight = useMemo(() => {
