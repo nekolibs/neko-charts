@@ -4,6 +4,7 @@ import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { getColorFromScale } from '../_helpers/colors'
 import { roundedBarPath } from '../_helpers/bar'
 import { useColorsScale, useTheme } from '../NekoChartTheme'
+import { resolveYRange } from '../_helpers/yRange'
 
 export function StackedBars({
   series: seriesRaw,
@@ -39,11 +40,7 @@ export function StackedBars({
 
   // Find max value (sum of all series at each point)
   const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
-  const dataMax = Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
-  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
-  const rawMin = Math.min(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
-  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
-  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
+  const { minValue, maxValue } = resolveYRange(series, { stacked: true, suggestedMax: suggestedMaxProp, suggestedMin: suggestedMinProp, max: maxProp, min: minProp })
 
   // Get x points length
   const xPoints = series[0]?.data?.length || 0

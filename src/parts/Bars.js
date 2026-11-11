@@ -4,6 +4,7 @@ import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { getColorFromScale } from '../_helpers/colors'
 import { roundedBarPath } from '../_helpers/bar'
 import { useColorsScale } from '../NekoChartTheme'
+import { resolveYRange } from '../_helpers/yRange'
 
 export function Bars({
   series: seriesRaw,
@@ -35,11 +36,7 @@ export function Bars({
   // Find max value across all series
   const series = pick ? seriesRaw.filter((s) => pick.includes(s.name)) : seriesRaw
   const yOf = (d) => (Number.isFinite(d?.y) ? d.y : 0)
-  const dataMax = Math.max(...series.flatMap((s) => s.data.map(yOf)))
-  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
-  const rawMin = Math.min(...series.flatMap((s) => s.data.map(yOf)))
-  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
-  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
+  const { minValue, maxValue } = resolveYRange(series, { suggestedMax: suggestedMaxProp, suggestedMin: suggestedMinProp, max: maxProp, min: minProp })
 
   // Get unique x values
   const xPoints = series[0].data.length

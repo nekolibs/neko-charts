@@ -5,6 +5,7 @@ import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { formatLargeNumber } from '../_helpers/numbers'
 import { estimateLabelWidth } from '../_helpers/colors'
 import { useTheme } from '../NekoChartTheme'
+import { resolveYRange } from '../_helpers/yRange'
 
 const VALUE_LABEL_OFFSET = 8
 
@@ -39,11 +40,7 @@ export function LabelsChart({
 
   // Calculate max value and step
   const series = pick ? seriesRaw.filter(s => pick.includes(s.name)) : seriesRaw
-  const dataMax = Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
-  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
-  const rawMin = Math.min(...series.flatMap(s => s.data.map(d => d.y)))
-  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
-  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
+  const { minValue, maxValue } = resolveYRange(series, { suggestedMax: suggestedMaxProp, suggestedMin: suggestedMinProp, max: maxProp, min: minProp })
   const xPoints = series[0]?.data?.length || 0
 
   // Calculate stepX based on spaceAround setting

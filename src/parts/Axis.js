@@ -7,6 +7,7 @@ import { CHART_PADDING_BOTTOM, CHART_PADDING_TOP } from '../NekoChart'
 import { useTheme } from '../NekoChartTheme'
 import { createXLabelFormatter, createYLabelFormatter } from '../_helpers/axis'
 import { estimateLabelWidth } from '../_helpers/colors'
+import { resolveYRange } from '../_helpers/yRange'
 
 export function Axis({
   // Data and dimensions
@@ -68,19 +69,7 @@ export function Axis({
   const firstData = series[0]?.data || []
 
   // Calculate maxValue from series
-  const dataMax = series.length > 0
-    ? stacked
-      ? Math.max(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
-      : Math.max(...series.flatMap((s) => s.data.map((d) => d.y)))
-    : 0
-  const maxValue = maxProp ?? (suggestedMaxProp ? Math.max(dataMax, suggestedMaxProp) : dataMax)
-  const rawMin = series.length > 0
-    ? stacked
-      ? Math.min(...series[0].data.map((_, i) => series.reduce((sum, s) => sum + (s.data[i]?.y || 0), 0)))
-      : Math.min(...series.flatMap(s => s.data.map(d => d.y)))
-    : 0
-  const dataMin = suggestedMinProp === 'auto' ? rawMin : Math.min(0, rawMin)
-  const minValue = minProp ?? (typeof suggestedMinProp === 'number' ? Math.min(dataMin, suggestedMinProp) : dataMin)
+  const { minValue, maxValue } = resolveYRange(series, { stacked, suggestedMax: suggestedMaxProp, suggestedMin: suggestedMinProp, max: maxProp, min: minProp })
 
   // Create smart formatters if not provided
   const smartXFormatter = formatXLabel || createXLabelFormatter(firstData, datesPeriod)
