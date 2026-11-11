@@ -6,6 +6,7 @@ import { formatLargeNumber } from '../_helpers/numbers'
 import { estimateLabelWidth } from '../_helpers/colors'
 import { useTheme } from '../NekoChartTheme'
 import { resolveYRange } from '../_helpers/yRange'
+import { thinLabelIndexes } from '../_helpers/labelThinning'
 
 const VALUE_LABEL_OFFSET = 8
 
@@ -54,24 +55,18 @@ export function LabelsChart({
   }
 
   // Calculate which labels to show based on available width
-  const formattedValues = series.flatMap((s) => s.data.map((d) => formatLargeNumber(d.y)))
+  const formattedValues = series.flatMap((s) => s.data.filter((d) => d?.y != null).map((d) => formatLargeNumber(d.y)))
   const minLabelWidth = estimateLabelWidth(formattedValues, theme.valueSize)
   const labelsToShow = Math.max(1, Math.floor(chartWidth / minLabelWidth))
-  const interval = Math.ceil(xPoints / labelsToShow)
 
   return (
     <>
-      {series.map((serie, serieIndex) => {
+      {series.map((serie) => {
+        const labelled = thinLabelIndexes(serie.data, labelsToShow)
         return (
           <React.Fragment key={`${serie.name}-values`}>
             {serie.data.map((point, i) => {
-              if (point.y === null || point.y === undefined) {
-                return null // Skip null points
-              }
-
-              // Only show labels at calculated interval
-              const shouldShowLabel = i % interval === 0
-              if (!shouldShowLabel) return null
+              if (!labelled.has(i)) return null
 
               const x = spaceAround
                 ? xSpace + paddingLeft + i * stepX + stepX / 2 // Center in space
