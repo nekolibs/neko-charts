@@ -5,5 +5,13 @@ export * from './ResponsiveChartWrapper'
 export * from './simple'
 export * from './parts'
 export * from './_data/muscles/keys'
+export { AbsSvg } from './abstractions/Svg'
+export { AbsG } from './abstractions/G'
+export { AbsPath } from './abstractions/Path'
+export { AbsRect } from './abstractions/Rect'
+export { AbsCircle } from './abstractions/Circle'
+export { AbsLine } from './abstractions/Line'
+export { AbsPolygon } from './abstractions/Polygon'
+export { AbsSvgText } from './abstractions/SvgText'
 
 export const cversion = 25
